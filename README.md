@@ -14,6 +14,6 @@ You can also change the val_user_num of conf.py and val_graph_size of options.py
 ## Example
 We can obtain the simulation results as follows:
 ### ASOPA:
-![image](https://github.com/Jil-Menzerna/ASOPA/assets/62533692/e290502a-9c2c-4c40-93a4-48a03c30cc10) 
+![image](https://github.com/user-attachments/assets/f3062470-f106-4437-99f8-747ddd77f9da)
 ### Baseline:
 ![image](https://github.com/Jil-Menzerna/ASOPA/assets/62533692/ed8e6576-bd8c-4098-91fb-e42908488c9a) 
