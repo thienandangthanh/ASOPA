@@ -8,8 +8,7 @@ You can also change the val_user_num of conf.py and val_graph_size of options.py
 ![image](https://github.com/Jil-Menzerna/ASOPA/assets/62533692/ce55ba30-03f8-4c18-853f-e66e0a010164)
 
 ### conf.py:
-![image](https://github.com/Jil-Menzerna/ASOPA/assets/62533692/55df224e-8f9d-49ff-be84-16f0e430c7a4)
-
+![image](https://github.com/user-attachments/assets/05d5d50d-1970-4246-9d59-f67006a9e1d2)
 
 ## Example
 We can obtain the simulation results as follows:
