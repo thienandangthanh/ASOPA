@@ -246,7 +246,7 @@ def duibi_tabu_search_gd(users=[], alpha=None, noise=args.noise, need_random=Fal
     users_order = []
     user_number = len(users)
     temp = get_max_sum_weighted_alpha_throughput(users=tusers, alpha=alpha, noise=noise)
-    print('wd_temp',temp)
+    # print('wd_temp',temp)
     opt_temp = temp
     tusers_0 = copy.deepcopy(tusers)
     tusers_next = tusers_0
@@ -270,7 +270,7 @@ def duibi_tabu_search_gd(users=[], alpha=None, noise=args.noise, need_random=Fal
     decode_order = [tuser.id for tuser in tusers_next]
     max_sum_weighted_alpha_throughput = get_max_sum_weighted_alpha_throughput(users=tusers_next, alpha=alpha,
                                                                               noise=noise)
-    print('tabu_search_throughput',max_sum_weighted_alpha_throughput)
+    # print('tabu_search_throughput',max_sum_weighted_alpha_throughput)
     if need_random:
         users = users_cun
     return decode_order, max_sum_weighted_alpha_throughput
@@ -296,7 +296,7 @@ def duibi_tabu_search_wd(users=[], alpha=None, noise=args.noise, need_random=Fal
     users_order = []
     user_number = len(users)
     temp = get_max_sum_weighted_alpha_throughput(users=tusers, alpha=alpha, noise=noise)
-    print('wd_temp',temp)
+    # print('wd_temp',temp)
     opt_temp = temp
     tusers_0 = copy.deepcopy(tusers)
     tusers_next = tusers_0
@@ -320,7 +320,7 @@ def duibi_tabu_search_wd(users=[], alpha=None, noise=args.noise, need_random=Fal
     decode_order = [tuser.id for tuser in tusers_next]
     max_sum_weighted_alpha_throughput = get_max_sum_weighted_alpha_throughput(users=tusers_next, alpha=alpha,
                                                                               noise=noise)
-    print('tabu_search_throughput',max_sum_weighted_alpha_throughput)
+    # print('tabu_search_throughput',max_sum_weighted_alpha_throughput)
     if need_random:
         users = users_cun
     return decode_order, max_sum_weighted_alpha_throughput

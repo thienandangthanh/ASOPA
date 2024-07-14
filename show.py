@@ -56,7 +56,7 @@ def show_speed_performance_dataset(dataset):
     users_w = dataset.w.squeeze(-1).numpy()
     # users_g=dataset
     methods={
-        'duibi_exhaustive_search': duibi_exhaustive_search,
+        # 'duibi_exhaustive_search': duibi_exhaustive_search,
         'duibi_g_order_ascd':duibi_g_order_asc,
              'duibi_g_order_desc':duibi_g_order_desc,
              'duibi_w_order_aesc': duibi_w_order_aesc,
@@ -81,7 +81,7 @@ def show_speed_performance_dataset(dataset):
     except:
         print('等待穷搜生成...')
 
-    # 穷搜top15 存储
+
     t_ten_performance_list = []
     t_ten_order_list = []
     for frame_i in tqdm(range(frames_num)):
@@ -99,12 +99,6 @@ def show_speed_performance_dataset(dataset):
             time_start=time.time()
             # 穷搜存一下top15
             if method_name == 'duibi_exhaustive_search':
-                # try:
-                #     top15_list = sio.loadmat("Top15/n%d_top15_1" % (user_num))['performance_list']
-                # except:
-                #     no_error = False
-                # if no_error:
-                #     continue
                 try:
                     _, t_throuhput, t_ten_throughput, t_ten_decode_order = method(users=users, noise=args.noise, alpha=args.alpha)
                 except BaseException as e:
@@ -130,33 +124,6 @@ def show_speed_performance_dataset(dataset):
                 performance_his[method_name].append(t_throuhput)
                 # './Top15/n%d_top15_1.mat' % (user_num)
 
-                # if 'duibi_exhaustive_search' in methods:
-                #     top15_i = copy.deepcopy(t_ten_throughput)
-                #     top15_i.sort(reverse=True)
-                #     if t_throuhput >= top15_i[14]:
-                #         top15_his[method_name]['top15'] += 1
-                #     if t_throuhput >= top15_i[9]:
-                #         top15_his[method_name]['top10'] += 1
-                #     if t_throuhput >= top15_i[4]:
-                #         top15_his[method_name]['top5'] += 1
-                #     if t_throuhput >= top15_i[0]:
-                #         top15_his[method_name]['top1'] += 1
-                # else:
-                #     try:
-                #         top15_i = copy.deepcopy(top15_list[frame_i])
-                #         top15_i = top15_i.tolist()
-                #         top15_i.sort(reverse=True)
-                #         if t_throuhput >= top15_i[14]:
-                #             top15_his[method_name]['top15'] += 1
-                #         if t_throuhput >= top15_i[9]:
-                #             top15_his[method_name]['top10'] += 1
-                #         if t_throuhput >= top15_i[4]:
-                #             top15_his[method_name]['top5'] += 1
-                #         if t_throuhput >= top15_i[0]:
-                #             top15_his[method_name]['top1'] += 1
-                #     except BaseException as e:
-                #         no_error = False
-                #         print(f'e={e},等待生成...')
 
         # if no_error:
         for i,method_name in enumerate(methods.keys()):
@@ -165,7 +132,6 @@ def show_speed_performance_dataset(dataset):
             #     continue
             speed_his[method_name].append(t_speed_list[i])
             performance_his[method_name].append(t_performance_list[i])
-            performance_percent_his[method_name].append(t_performance_list[i] / max(top15_list[frame_i]))
 
     # for method_name in methods.keys():
     print(f'速度：')
