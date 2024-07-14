@@ -1,12 +1,12 @@
 ## Simulation setting
 The code of ASOPA.
 ### Train
-Run run.py, and ASOPA can be trained by a variable of users. 
-The details of the dataset can be found in ./problems/problem_noop.py class NOOP_allnum_Daset.
+Run run.py, and ASOPA can be trained by a variable of users. <br>
+The details of the dataset can be found in ./problems/problem_noop.py class NOOP_allnum_Daset.<br>
 ### Validation
-Run ASOPA_validation.py, and the network utility and execution latency of ASOPA will be displayed. 
-Run Baseline_validation.py, and the network utility and execution latency of baseline algorithms will be displayed.
-You can also change the val_user_num of conf.py and val_graph_size of options.py to see the simulation with 5 or 10 users.
+Run ASOPA_validation.py, and the network utility and execution latency of ASOPA will be displayed. <br>
+Run Baseline_validation.py, and the network utility and execution latency of baseline algorithms will be displayed.<br>
+You can also change the val_user_num of conf.py and val_graph_size of options.py to see the simulation with 5 or 10 users.<br>
 
 ### options.py:
 ![image](https://github.com/Jil-Menzerna/ASOPA/assets/62533692/ce55ba30-03f8-4c18-853f-e66e0a010164)
