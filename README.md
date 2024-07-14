@@ -12,8 +12,6 @@ You can also change the val_user_num of conf.py and val_graph_size of options.py
 When you validate ASOPA and baseline algorithms with 8 users, you can set options.py and conf.py as follows.
 ### options.py:
 ![image](https://github.com/user-attachments/assets/90b90963-d782-484c-8012-2d6d3aacf8f2)
-
-
 ### conf.py:
 ![image](https://github.com/user-attachments/assets/2e928ced-fa09-4cef-9e36-b2856c192355)
 
