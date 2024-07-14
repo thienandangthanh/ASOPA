@@ -20,4 +20,5 @@ We can obtain the simulation results as follows:
 ### ASOPA:
 ![image](https://github.com/user-attachments/assets/f3062470-f106-4437-99f8-747ddd77f9da)
 ### Baseline:
-![image](https://github.com/Jil-Menzerna/ASOPA/assets/62533692/ed8e6576-bd8c-4098-91fb-e42908488c9a) 
+![image](https://github.com/user-attachments/assets/c682f269-1701-414c-a1cf-b183bfdb9908)
+
