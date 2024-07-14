@@ -165,7 +165,7 @@ def show_speed_performance_dataset(dataset):
             performance_his[method_name].append(t_performance_list[i])
 
     # for method_name in methods.keys():
-    print(f'速度：')
+    print(f'Speed：')
     for k, v in speed_his.items():
         print(f'{k}:{sum(v) / len(v)}')
     # if no_error:
@@ -174,16 +174,10 @@ def show_speed_performance_dataset(dataset):
     #         th_sum_exhaustive += max(top15_list[i])
     #     print(f'duibi_exhaustive_search:',th_sum_exhaustive/len(top15_list))
 
-    print(f'性能：')
+    print(f'Network utility：')
     for k, v in performance_his.items():
         print(f'{k}:{sum(v) / len(v)}')
 
-    print(f'前15命中率：')
-    for k, v in top15_his.items():
-        if k != 'duibi_exhaustive_search':
-            for top_num in v:
-                print(f'{k}-{top_num}:{v[top_num] / len(dataset)}')
-    # return speed_his,performance_his
 
     if 'duibi_exhaustive_search' in methods and not no_error:
         # 把本轮做好的top15样本存好，留到下一轮对比。因为固定了随机种子，所以没问题！
