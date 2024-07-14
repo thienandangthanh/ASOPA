@@ -36,7 +36,7 @@ def generate_topology(user_number=args.user_num, d_min=args.d_min, d_max=args.d_
     # d = np.random.random([user_number]) * (d_max - d_min) + d_min
     # 计算各用户的上行平均信道增益，暂时与TMC的计算公式相同
     g = [4.11 * (3e8 / (4 * math.pi * 915e6 * td)) ** 2.8 for td in d]
-    print(f'\ng={g}')
+    # print(f'\ng={g}')
     # 暂时令各用户的权重为w_min与w_max交替的形式
     w = np.ones(user_number)
     # w = [w_min if i % 2 == 0 else w_max for i, _ in enumerate(w)]
@@ -69,11 +69,11 @@ def generate_topology(user_number=args.user_num, d_min=args.d_min, d_max=args.d_
     p_max = [p_max_possible[index] for index in p_max_index]
     # 让用户的最大发送功率为[1,2,1,2,1,2.....]
     # p_max = [1 if i%2==0 else 2 for i in range(user_number)]
-    print(f'd={d}')
+    # print(f'd={d}')
     # random.shuffle(w)
-    print(f'w={w}')
+    # print(f'w={w}')
     # random.shuffle(p_max)
-    print(f'p_max={p_max}')
+    # print(f'p_max={p_max}')
     # 创建用户数组
     users = []
     for i in range(user_number):
@@ -126,11 +126,11 @@ def generate_val_topology(user_number=args.user_num, d_min=args.d_min, d_max=arg
     p_max = [p_max_possible[index] for index in p_max_index]
     # 让用户的最大发送功率为[1,2,1,2,1,2.....]
     # p_max = [1 if i%2==0 else 2 for i in range(user_number)]
-    # print(f'd={d}')
+    print(f'd={d}')
     # random.shuffle(w)
-    # print(f'w={w}')
+    print(f'w={w}')
     # random.shuffle(p_max)
-    # print(f'p_max={p_max}')
+    print(f'p_max={p_max}')
     # 创建用户数组
     users = []
     for i in range(user_number):
@@ -325,6 +325,7 @@ def duibi_tabu_search_wd(users=[], alpha=None, noise=args.noise, need_random=Fal
         users = users_cun
     return decode_order, max_sum_weighted_alpha_throughput
 
+
 # 对比方法，qian的启发式方法（不断找到个最好的位置插入）（先打乱用户，然后按照打乱之后的用户顺序进行插入）
 def duibi_heuristic_method_qian_random(users=[], alpha=None, noise=args.noise):
     return duibi_heuristic_method_qian(users,alpha,noise,need_random=True)
@@ -406,8 +407,6 @@ def _get_sum_weighted_ln_throughput(users=[], p=None, noise=args.noise, need_use
         # # 把目标值改小 【有效果，但不太合理，不好叙述。不如直接把高斯白噪声调了】
         # user_throughput_list.append(tuser.w * math.log(math.log2(1 + tuser.g * p[tindex] / (tnoise*3))))
         sum_weighted_ln_throughput += user_throughput_list[-1]
-        # if user_throughput_list[-1] > 10:
-        #     print('超出上限',user_throughput_list[-1])
         # print(f'math.log(math.log2(1 + tuser.g * p[tindex] / tnoise))={math.log(math.log2(1 + tuser.g * p[tindex] / tnoise))}')
         # print(f'tuser.g={tuser.g},p[tindex]={p[tindex]}')
         tnoise += tuser.g * p[tindex]
@@ -536,8 +535,6 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
                                       users[tyk + user_number].g / tnoise
                     if tyj == tyk:
                         h_np[tyj][tyk] += z[ti] * e_x[tyj] * users[tyj + user_number].g / tnoise
-                        # h_np[tyj][tyk] += z[ti] *( 1-(e_x[tyj] * users[tyj + user_number].g)) / tnoise * \
-                        #               (e_x[tyk] * users[tyk + user_number].g) / tnoise
             df_np[ti][txi] += math.log(2) / tuser.w * a * b / c
             tnoise += tsignal
             if z is None:
