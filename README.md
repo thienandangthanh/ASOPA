@@ -14,7 +14,7 @@ When you validate ASOPA and baseline algorithms with 8 users, you can set option
 ![image](https://github.com/user-attachments/assets/afeb6af4-35e5-4fb0-a377-694348485ca9)
 
 ### conf.py:
-![image](https://github.com/user-attachments/assets/05d5d50d-1970-4246-9d59-f67006a9e1d2)
+![image](https://github.com/user-attachments/assets/2e928ced-fa09-4cef-9e36-b2856c192355)
 
 ## Example
 We can obtain the simulation results as follows:
