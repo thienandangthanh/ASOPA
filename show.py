@@ -40,56 +40,6 @@ def show_order_influence():
     plt.show()
 
 
-def show_speed_performance(users_g=None):
-    # 显示不能方法的速度、性能对比
-    user_num=args.user_num
-    frames_num=100
-    # 生成拓扑
-    # users = generate_topology(user_num,1,20,1,3)
-    users=noop_users
-    # 用户在各帧的信道质量可以实时生成，也可以一次性生成完毕，这里先采用后者
-    users_g_hat = np.asarray([tuser.g_hat for tuser in users])
-    if users_g is None:
-        users_g = np.random.rayleigh(scale=1, size=[frames_num, user_num]) * users_g_hat
-    methods={
-             'duibi_g_order_ascd':duibi_g_order_asc,
-             'duibi_g_order_desc':duibi_g_order_desc,
-             'duibi_heuristic_method_qian':duibi_heuristic_method_qian,
-             'duibi_exhaustive_search':duibi_exhaustive_search
-             }
-    performance_his=defaultdict(list)
-    speed_his=defaultdict(list)
-    for frame_i in tqdm(range(frames_num)):
-        tg=users_g[frame_i,:]
-        # for i in range(user_num):
-        #     users[i].g=tg[i]
-        set_users_g(users,tg)
-
-        no_error=True
-        t_speed_list=[]
-        t_performance_list=[]
-        for method_name,method in methods.items():
-            time_start=time.time()
-            try:
-                _,t_throuhput=method(users=users,noise=args.noise,alpha=args.alpha)
-            except BaseException as e:
-                no_error=False
-                print(f'e={e}')
-                break
-            time_end=time.time()
-            t_speed_list.append(time_end-time_start)
-            t_performance_list.append(t_throuhput)
-            # speed_his[method_name].append(time_end-time_start)
-            # performance_his[method_name].append(t_throuhput)
-        if no_error:
-            for i,method_name in enumerate(methods.keys()):
-                speed_his[method_name].append(t_speed_list[i])
-                performance_his[method_name].append(t_performance_list[i])
-    # for method_name in methods.keys():
-
-    return speed_his,performance_his
-
-
 def show_speed_performance_dataset(dataset):
     dataset=copy.deepcopy(dataset)
     users=copy.deepcopy(val_noop_users)
