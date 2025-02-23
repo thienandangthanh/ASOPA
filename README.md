@@ -2,7 +2,7 @@
 The code of ASOPA.
 ## Cite this work
 L. Huang, B. Zhu, R. Nan, K. Chi and Y. Wu, "Attention-Based SIC Ordering and Power Allocation for Non-Orthogonal Multiple Access Networks," in IEEE Transactions on Mobile Computing, vol. 24, no. 2, pp. 939-955, Feb. 2025.
-'''
+```
 @ARTICLE{10700682,
   author={Huang, Liang and Zhu, Bincheng and Nan, Runkai and Chi, Kaikai and Wu, Yuan},
   journal={IEEE Transactions on Mobile Computing}, 
@@ -13,7 +13,7 @@ L. Huang, B. Zhu, R. Nan, K. Chi and Y. Wu, "Attention-Based SIC Ordering and Po
   pages={939-955},
   keywords={NOMA;Interference cancellation;Resource management;Optimization;Wireless networks;Wireless communication;Uplink;Complexity theory;Measurement;Heuristic algorithms;Deep reinforcement learning (DRL);resource allocation;successive interference cancellation (SIC);non-orthogonal multiple access (NOMA)},
   doi={10.1109/TMC.2024.3470828}}
-'''
+```
 ## About authors
 * [Liang Huang](https://scholar.google.com/citations?user=NifLoZ4AAAAJ),lianghuang@zjut.edu.cn
 * [Bincheng Zhu](https://ieeexplore.ieee.org/author/37089420307),bczhu@zjut.edu.cn
