@@ -15,11 +15,11 @@ L. Huang, B. Zhu, R. Nan, K. Chi and Y. Wu, "Attention-Based SIC Ordering and Po
   doi={10.1109/TMC.2024.3470828}}
 ```
 ## About authors
-* [Liang Huang](https://scholar.google.com/citations?user=NifLoZ4AAAAJ),lianghuang@zjut.edu.cn
-* [Bincheng Zhu](https://ieeexplore.ieee.org/author/37089420307),bczhu@zjut.edu.cn
-* [Nanrun Kai](https://ieeexplore.ieee.org/author/37089596991),rknan@zjut.edu.cn
-* [Kaikai Chi](https://scholar.google.com/citations?user=MrdiGtMAAAAJ&hl=en&oi=ao),kkchi@zjut.edu.cn
-* [Yuan Wu](https://scholar.google.com/citations?hl=en&user=H1bxY_4AAAAJ),yuanwu@um.edu.mo
+* [Liang Huang](https://scholar.google.com/citations?user=NifLoZ4AAAAJ) ,lianghuang@zjut.edu.cn
+* [Bincheng Zhu](https://ieeexplore.ieee.org/author/37089420307) ,bczhu@zjut.edu.cn
+* [Nanrun Kai](https://ieeexplore.ieee.org/author/37089596991) ,rknan@zjut.edu.cn
+* [Kaikai Chi](https://scholar.google.com/citations?user=MrdiGtMAAAAJ&hl=en&oi=ao) ,kkchi@zjut.edu.cn
+* [Yuan Wu](https://scholar.google.com/citations?hl=en&user=H1bxY_4AAAAJ) ,yuanwu@um.edu.mo
 
 # Train
 Run run.py, and ASOPA can be trained by a variable of users. <br>
