@@ -47,10 +47,3 @@ pillow>=8.0.0
 # Logging and Visualization
 tensorboard>=2.8.0
 protobuf<3.21.0  # For tensorboard compatibility
-
-# System dependencies (installed via apt):
-# - libopenblas-dev
-# - liblapack-dev
-# - gfortran
-# - build-essential
-# - python3.10-dev
