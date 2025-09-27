@@ -1,0 +1,50 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+{
+    "name": "Existing Dockerfile",
+    "build": {
+        // Sets the run context to one level up instead of the .devcontainer folder.
+        "context": "..",
+        // Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+        "dockerfile": "../Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    },
+
+    // Container configuration
+    "workspaceFolder": "/workspace/ASOPA",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/ASOPA,type=bind,consistency=cached",
+
+    // GPU support for CUDA development
+    "hostRequirements": {
+      "gpu": "optional"
+    },
+
+    // Docker run arguments for GPU access and development
+    "runArgs": [
+      "--gpus", "all",
+    ],
+
+    // Features to add to the dev container. More info: https://containers.dev/features.
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
+
+    // Uncomment the next line to run commands after the container is created.
+    // "postCreateCommand": "uv venv --clear && source .venv/bin/activate",
+
+
+    // Configure tool-specific properties.
+    // "customizations": {},
+
+    // Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
+    // "remoteUser": "devcontainer"
+}
