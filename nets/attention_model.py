@@ -115,7 +115,7 @@ class AttentionModel(nn.Module):
         """
         # print('attention_input:',input,input[:,:,-2:])
         # print(len(input))
-        masked = np.where(input<=0,True,False)[:,:,0]     # masked 为padding的mask,其中1为不mask，0为mask
+        masked = torch.where(input<=0, True, False)[:,:,0]     # masked 为padding的mask,其中1为不mask，0为mask
         # print('masked',masked)
         if self.checkpoint_encoder and self.training:  # Only checkpoint if we need gradients
             embeddings, _ = checkpoint(self.embedder, self._init_embed(input))
