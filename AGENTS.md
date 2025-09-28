@@ -15,6 +15,56 @@ This document provides context and instructions for AI coding agents working on 
 ### Core Problem
 Maximize weighted proportional fairness in uplink NOMA networks by jointly optimizing SIC ordering and power allocation.
 
+## Development Environment Setup
+
+### DevPod Environment
+This project uses **DevPod** for consistent development environments. AI agents should use the following commands to interact with the development environment:
+
+#### Starting the Development Environment
+```bash
+# Start DevPod environment with VS Code
+devpod up --ide vscode .
+```
+
+#### Executing Commands in DevPod
+After starting the DevPod environment, AI agents can execute commands remotely using SSH:
+
+```bash
+# Basic command execution
+ssh asopa.devpod 'command_here'
+
+# Activate Python virtual environment and run commands
+ssh asopa.devpod 'source .venv/bin/activate && python --version'
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --help'
+ssh asopa.devpod 'source .venv/bin/activate && pip list'
+```
+
+#### Important Notes for AI Agents
+1. **Virtual Environment**: Every new shell session requires activating the Python virtual environment with `source .venv/bin/activate`
+2. **Remote Execution**: All Python commands must be executed within the DevPod environment
+3. **Environment Isolation**: The DevPod environment ensures consistent dependencies and configurations across different development sessions
+
+#### Common DevPod Commands for AI Agents
+```bash
+# Check Python version and environment
+ssh asopa.devpod 'source .venv/bin/activate && python --version && which python'
+
+# Install new dependencies
+ssh asopa.devpod 'source .venv/bin/activate && pip install package_name'
+
+# Run training with specific parameters
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --n_epochs 10 --graph_size 5'
+
+# Execute validation scripts
+ssh asopa.devpod 'source .venv/bin/activate && python ASOPA_validation.py'
+
+# Run tests
+ssh asopa.devpod 'source .venv/bin/activate && python -m pytest tests/'
+
+# Check GPU availability (if CUDA is configured)
+ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(torch.cuda.is_available())"'
+```
+
 ## Project Structure
 
 ```

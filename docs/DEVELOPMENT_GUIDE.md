@@ -54,6 +54,105 @@ pip install black flake8 pytest pytest-cov mypy
 
 ## Development Environment
 
+### DevPod Environment Setup
+
+This project uses **DevPod** for consistent development environments. Follow these steps to set up and use the DevPod environment:
+
+#### Starting DevPod Environment
+
+```bash
+# Start DevPod environment with VS Code
+devpod up --ide vscode .
+```
+
+#### Executing Commands in DevPod
+
+After starting the DevPod environment, you can access it in two ways:
+
+##### For Human Developers (Interactive Shell)
+Connect to an interactive bash shell in the DevPod environment:
+
+```bash
+# Connect to interactive shell
+ssh asopa.devpod
+
+# Once connected, activate virtual environment
+source .venv/bin/activate
+
+# Now you can run commands directly
+python --version
+python run.py --help
+pip list
+python run.py --n_epochs 10 --graph_size 5
+```
+
+##### For AI Agents (Remote Command Execution)
+AI agents should use the command template for remote execution:
+
+```bash
+# AI agents use this format for remote command execution
+ssh asopa.devpod 'source .venv/bin/activate && python --version'
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --help'
+ssh asopa.devpod 'source .venv/bin/activate && pip list'
+```
+
+#### Important Notes
+
+1. **Virtual Environment**: Every new shell session requires activating the Python virtual environment with `source .venv/bin/activate`
+2. **Remote Execution**: All Python commands must be executed within the DevPod environment
+3. **Environment Isolation**: The DevPod environment ensures consistent dependencies and configurations across different development sessions
+4. **Interactive vs Remote**: Human developers can use interactive SSH sessions, while AI agents use remote command execution
+
+#### Common DevPod Commands
+
+##### For Human Developers (Interactive Shell)
+```bash
+# Connect to DevPod
+ssh asopa.devpod
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Check Python version and environment
+python --version && which python
+
+# Install new dependencies
+pip install package_name
+
+# Run training with specific parameters
+python run.py --n_epochs 10 --graph_size 5
+
+# Execute validation scripts
+python ASOPA_validation.py
+
+# Run tests
+python -m pytest tests/
+
+# Check GPU availability (if CUDA is configured)
+python -c "import torch; print(torch.cuda.is_available())"
+```
+
+##### For AI Agents (Remote Command Execution)
+```bash
+# Check Python version and environment
+ssh asopa.devpod 'source .venv/bin/activate && python --version && which python'
+
+# Install new dependencies
+ssh asopa.devpod 'source .venv/bin/activate && pip install package_name'
+
+# Run training with specific parameters
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --n_epochs 10 --graph_size 5'
+
+# Execute validation scripts
+ssh asopa.devpod 'source .venv/bin/activate && python ASOPA_validation.py'
+
+# Run tests
+ssh asopa.devpod 'source .venv/bin/activate && python -m pytest tests/'
+
+# Check GPU availability (if CUDA is configured)
+ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(torch.cuda.is_available())"'
+```
+
 ### IDE Configuration
 
 #### VS Code Setup
