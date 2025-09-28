@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.9.1-devel-ubuntu22.04
+FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -38,7 +38,7 @@ RUN uv venv .venv
 # Install Python dependencies with GPU support
 RUN . .venv/bin/activate && \
     uv pip install -r requirements.txt \
-    --index https://download.pytorch.org/whl/cu129
+    --index https://download.pytorch.org/whl/cu121
 
 # Set environment variables for GPU access
 ENV NVIDIA_VISIBLE_DEVICES=all
