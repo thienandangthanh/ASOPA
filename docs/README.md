@@ -40,6 +40,22 @@
 - PyTorch 2.8.0+
 - CUDA 12.9+ (recommended)
 - CVXOPT for optimization
+- DevPod for development environment
+
+### Development Environment Setup
+
+This project uses **DevPod** for consistent development environments:
+
+```bash
+# Start DevPod environment with VS Code
+devpod up --ide vscode .
+
+# Execute commands in DevPod environment
+ssh asopa.devpod 'source .venv/bin/activate && python --version'
+ssh asopa.devpod 'source .venv/bin/activate && pip list'
+```
+
+**Important**: Every new shell session requires activating the Python virtual environment with `source .venv/bin/activate`.
 
 ### Installation
 ```bash
@@ -47,26 +63,26 @@
 git clone <repository-url>
 cd ASOPA
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (in DevPod environment)
+ssh asopa.devpod 'source .venv/bin/activate && pip install -r requirements.txt'
 
 # Verify installation
-python -c "import torch; print(f'PyTorch version: {torch.__version__}')"
+ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(f\'PyTorch version: {torch.__version__}\')"'
 ```
 
 ### Running Validation
 ```bash
 # Validate ASOPA performance
-python ASOPA_validation.py
+ssh asopa.devpod 'source .venv/bin/activate && python ASOPA_validation.py'
 
 # Run baseline comparisons
-python run_baseline.py
+ssh asopa.devpod 'source .venv/bin/activate && python run_baseline.py'
 ```
 
 ### Training from Scratch
 ```bash
 # Train ASOPA model
-python run.py --n_epochs 300 --graph_size 10
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --n_epochs 300 --graph_size 10'
 ```
 
 ## Architecture Guide
