@@ -168,8 +168,8 @@ decode_order, throughput = my_baseline_method(users)
 
 ### Environment Setup
 - **Python 3.8+** required
-- **PyTorch 2.8.0+** recommended
-- **CUDA 12.9+** for GPU acceleration
+- **PyTorch 2.3.1** (pinned version for compatibility)
+- **CUDA 12.1+** for GPU acceleration
 - **CVXOPT** for optimization
 
 ## 📈 Extending ASOPA

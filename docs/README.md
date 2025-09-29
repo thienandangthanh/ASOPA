@@ -37,8 +37,8 @@
 
 ### Prerequisites
 - Python 3.8+
-- PyTorch 2.8.0+
-- CUDA 12.9+ (recommended)
+- PyTorch 2.3.1 (pinned version for compatibility)
+- CUDA 12.1+ (recommended)
 - CVXOPT for optimization
 - DevPod for development environment
 
@@ -68,6 +68,7 @@ ssh asopa.devpod 'source .venv/bin/activate && pip install -r requirements.txt'
 
 # Verify installation
 ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(f\'PyTorch version: {torch.__version__}\')"'
+# Expected output: PyTorch version: 2.3.1
 ```
 
 ### Running Validation
