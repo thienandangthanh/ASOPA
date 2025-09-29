@@ -2,7 +2,6 @@
 
 ## Table of Contents
 - [Common Issues](#common-issues)
-- [Installation Problems](#installation-problems)
 - [Training Issues](#training-issues)
 - [Performance Problems](#performance-problems)
 - [Memory Issues](#memory-issues)
@@ -26,9 +25,9 @@ ModuleNotFoundError: No module named 'nets'
 1. **Check virtual environment**:
    ```bash
    # Activate virtual environment
-   source asopa_env/bin/activate  # Linux/Mac
+   source .venv/bin/activate  # Linux/Mac
    # or
-   asopa_env\Scripts\activate     # Windows
+   .venv\Scripts\activate     # Windows
    
    # Verify Python path
    which python
@@ -36,7 +35,7 @@ ModuleNotFoundError: No module named 'nets'
 
 2. **Reinstall dependencies**:
    ```bash
-   pip install -r requirements.txt
+   uv pip install -r requirements.txt
    ```
 
 3. **Check Python path**:
@@ -115,102 +114,6 @@ FileNotFoundError: Variable_user_n10_epoch300.pth
    # Then move to GPU if needed
    if torch.cuda.is_available():
        model = model.cuda()
-   ```
-
-## Installation Problems
-
-### Issue: PyTorch installation fails
-
-**Symptoms:**
-```
-ERROR: Could not find a version that satisfies the requirement torch==2.3.1+cu121
-ERROR: No matching distribution found for torch==2.3.1+cu121
-```
-
-**Solutions:**
-
-1. **Install compatible PyTorch version**:
-   ```bash
-   # For CUDA 12.1
-   pip install torch==2.3.1+cu121 torchvision==0.18.1+cu121 -f https://download.pytorch.org/whl/torch_stable.html
-   
-   # For CPU only
-   pip install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
-   ```
-
-2. **Use conda instead**:
-   ```bash
-   conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
-   ```
-
-3. **Check system requirements**:
-   ```bash
-   python --version  # Should be 3.8+
-   pip --version
-   ```
-
-### Issue: CVXOPT installation fails
-
-**Symptoms:**
-```
-ERROR: Failed building wheel for cvxopt
-ImportError: No module named 'cvxopt'
-```
-
-**Solutions:**
-
-1. **Install system dependencies**:
-   ```bash
-   # Ubuntu/Debian
-   sudo apt-get install libglpk-dev libgsl-dev
-   
-   # CentOS/RHEL
-   sudo yum install glpk-devel gsl-devel
-   
-   # macOS
-   brew install glpk gsl
-   ```
-
-2. **Use conda**:
-   ```bash
-   conda install -c conda-forge cvxopt
-   ```
-
-3. **Install from source**:
-   ```bash
-   pip install --no-binary=cvxopt cvxopt
-   ```
-
-### Issue: Dependency conflicts
-
-**Symptoms:**
-```
-ERROR: pip's dependency resolver does not currently take into account all the packages that are installed
-```
-
-**Solutions:**
-
-1. **Create clean environment**:
-   ```bash
-   python -m venv asopa_clean
-   source asopa_clean/bin/activate
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-
-2. **Use conda environment**:
-   ```bash
-   conda create -n asopa python=3.8
-   conda activate asopa
-   conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
-   pip install -r requirements.txt
-   ```
-
-3. **Resolve conflicts manually**:
-   ```bash
-   pip install --upgrade pip
-   pip install --upgrade setuptools wheel
-   pip install -r requirements.txt --force-reinstall
    ```
 
 ## Training Issues
