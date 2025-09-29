@@ -15,6 +15,7 @@
 ### Prerequisites
 
 - Python 3.8 or higher
+- uv as package and project manager
 - PyTorch 2.3.1 (pinned version for compatibility)
 - CUDA 12.1+ (recommended for training)
 - Git for version control
@@ -29,13 +30,13 @@
 
 2. **Create virtual environment**:
    ```bash
-   python -m venv asopa_env
-   source asopa_env/bin/activate  # On Windows: asopa_env\Scripts\activate
+   uv venv .venv
+   source .venv/bin/activate  # On Windows CMD: .venv\bin\activate.bat
    ```
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   uv pip install -r requirements.txt
    ```
 
 4. **Verify installation**:
@@ -44,14 +45,6 @@
    python -c "import cvxopt; print('CVXOPT: OK')"
    # Expected PyTorch version: 2.3.1
    ```
-
-### Development Tools
-
-Install additional development tools:
-
-```bash
-pip install black flake8 pytest pytest-cov mypy
-```
 
 ## Development Environment
 
@@ -83,7 +76,7 @@ source .venv/bin/activate
 # Now you can run commands directly
 python --version
 python run.py --help
-pip list
+uv pip list
 python run.py --n_epochs 10 --graph_size 5
 ```
 
@@ -118,7 +111,7 @@ source .venv/bin/activate
 python --version && which python
 
 # Install new dependencies
-pip install package_name
+uv pip install package_name
 
 # Run training with specific parameters
 python run.py --n_epochs 10 --graph_size 5
@@ -845,32 +838,36 @@ pytest tests/test_models.py::TestAttentionModel::test_forward_pass
 # Enable anomaly detection
 torch.autograd.set_detect_anomaly(True)
 
-# Check for NaN/Inf values
+# Check for NaN/Inf
 def check_tensor_values(tensor, name):
     if torch.isnan(tensor).any():
         print(f"NaN detected in {name}")
     if torch.isinf(tensor).any():
         print(f"Inf detected in {name}")
+    print(f"{name} range: [{tensor.min():.4f}, {tensor.max():.4f}]")
 
-# Monitor gradient norms
+# Monitor gradients
 def monitor_gradients(model):
     total_norm = 0
-    for param in model.parameters():
+    for name, param in model.named_parameters():
         if param.grad is not None:
             param_norm = param.grad.data.norm(2)
             total_norm += param_norm.item() ** 2
+            print(f"{name} gradient norm: {param_norm:.4f}")
     total_norm = total_norm ** (1. / 2)
-    print(f"Gradient norm: {total_norm}")
+    print(f"Total gradient norm: {total_norm:.4f}")
 ```
 
-#### 2. Memory Debugging
+#### 2. Memory Monitoring
 
 ```python
 # Monitor GPU memory
 def print_gpu_memory():
     if torch.cuda.is_available():
-        print(f"GPU memory allocated: {torch.cuda.memory_allocated() / 1024**3:.2f} GB")
-        print(f"GPU memory cached: {torch.cuda.memory_reserved() / 1024**3:.2f} GB")
+        allocated = torch.cuda.memory_allocated() / 1024**3
+        cached = torch.cuda.memory_reserved() / 1024**3
+        print(f"GPU memory allocated: {allocated:.2f} GB")
+        print(f"GPU memory cached: {cached:.2f} GB")
 
 # Clear GPU cache
 def clear_gpu_cache():
@@ -878,28 +875,31 @@ def clear_gpu_cache():
         torch.cuda.empty_cache()
 ```
 
-#### 3. Logging
+#### 3. Performance Profiling
 
 ```python
-import logging
+# Profile training time
+import time
 
-# Set up logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('debug.log'),
-        logging.StreamHandler()
-    ]
-)
-
-logger = logging.getLogger(__name__)
-
-# Use in code
-logger.debug(f"Input shape: {input.shape}")
-logger.info(f"Training epoch {epoch} completed")
-logger.warning(f"Low performance: {performance}")
-logger.error(f"Training failed: {error}")
+def profile_training_step(model, batch):
+    start_time = time.time()
+    
+    # Forward pass
+    forward_start = time.time()
+    cost, log_prob = model(batch)
+    forward_time = time.time() - forward_start
+    
+    # Backward pass
+    backward_start = time.time()
+    loss = cost.mean()
+    loss.backward()
+    backward_time = time.time() - backward_start
+    
+    total_time = time.time() - start_time
+    
+    print(f"Forward time: {forward_time:.4f}s")
+    print(f"Backward time: {backward_time:.4f}s")
+    print(f"Total time: {total_time:.4f}s")
 ```
 
 ### Common Debugging Scenarios
