@@ -368,6 +368,11 @@ from resource_allocation_optimization import get_optimal_p
 
 ## Agent-Specific Instructions
 
+### General Guidelines for All Agents
+- **NO EMOJIS**: Do not use emojis in any code, comments, documentation, or responses
+- **Professional tone**: Maintain a professional, technical tone throughout all interactions
+- **Clear communication**: Use clear, concise language without decorative elements
+
 ### For Code Generation Agents
 - **Always include type hints** and docstrings
 - **Follow the established patterns** in existing code
