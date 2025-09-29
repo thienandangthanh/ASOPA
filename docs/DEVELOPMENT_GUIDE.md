@@ -15,8 +15,8 @@
 ### Prerequisites
 
 - Python 3.8 or higher
-- PyTorch 2.8.0 or higher
-- CUDA 12.9+ (recommended for training)
+- PyTorch 2.3.1 (pinned version for compatibility)
+- CUDA 12.1+ (recommended for training)
 - Git for version control
 
 ### Initial Setup
@@ -42,6 +42,7 @@
    ```bash
    python -c "import torch; print(f'PyTorch: {torch.__version__}')"
    python -c "import cvxopt; print('CVXOPT: OK')"
+   # Expected PyTorch version: 2.3.1
    ```
 
 ### Development Tools

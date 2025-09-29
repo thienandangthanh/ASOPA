@@ -123,8 +123,8 @@ FileNotFoundError: Variable_user_n10_epoch300.pth
 
 **Symptoms:**
 ```
-ERROR: Could not find a version that satisfies the requirement torch==2.8.0+cu129
-ERROR: No matching distribution found for torch==2.8.0+cu129
+ERROR: Could not find a version that satisfies the requirement torch==2.3.1+cu121
+ERROR: No matching distribution found for torch==2.3.1+cu121
 ```
 
 **Solutions:**
@@ -132,15 +132,15 @@ ERROR: No matching distribution found for torch==2.8.0+cu129
 1. **Install compatible PyTorch version**:
    ```bash
    # For CUDA 12.1
-   pip install torch==2.8.0+cu121 torchvision==0.23.0+cu121 -f https://download.pytorch.org/whl/torch_stable.html
+   pip install torch==2.3.1+cu121 torchvision==0.18.1+cu121 -f https://download.pytorch.org/whl/torch_stable.html
    
    # For CPU only
-   pip install torch==2.8.0+cpu torchvision==0.23.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+   pip install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
    ```
 
 2. **Use conda instead**:
    ```bash
-   conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+   conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
    ```
 
 3. **Check system requirements**:
@@ -202,7 +202,7 @@ ERROR: pip's dependency resolver does not currently take into account all the pa
    ```bash
    conda create -n asopa python=3.8
    conda activate asopa
-   conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+   conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
    pip install -r requirements.txt
    ```
 

@@ -7,9 +7,9 @@ This document provides context and instructions for AI coding agents working on 
 **ASOPA** is a deep reinforcement learning framework for optimizing Non-Orthogonal Multiple Access (NOMA) networks. The system uses attention-based neural networks to determine optimal Successive Interference Cancellation (SIC) ordering and convex optimization for power allocation.
 
 ### Key Technologies
-- **PyTorch 2.8.0+** for neural networks
+- **PyTorch 2.3.1** for neural networks (pinned version for compatibility)
 - **CVXOPT** for convex optimization
-- **CUDA 12.9+** for GPU acceleration
+- **CUDA 12.1+** for GPU acceleration
 - **Python 3.8+** as the primary language
 
 ### Core Problem
