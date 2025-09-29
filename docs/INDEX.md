@@ -2,9 +2,9 @@
 
 Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Ordering and Power Allocation) project. This documentation suite provides everything you need to understand, use, and extend the ASOPA framework.
 
-## 📚 Documentation Overview
+## Documentation Overview
 
-### 🚀 [README.md](README.md) - Getting Started
+### [README.md](README.md) - Getting Started
 **Start here for new users**
 - Project overview and key features
 - Quick start guide
@@ -12,7 +12,7 @@ Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Or
 - Basic usage examples
 - Paper reference and citations
 
-### 🏗️ [ARCHITECTURE.md](ARCHITECTURE.md) - System Design
+### [ARCHITECTURE.md](ARCHITECTURE.md) - System Design
 **Deep dive into the system architecture**
 - High-level system overview
 - Core components and their interactions
@@ -21,7 +21,7 @@ Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Or
 - Data flow diagrams
 - Performance considerations
 
-### 🔧 [API_REFERENCE.md](API_REFERENCE.md) - Complete API Documentation
+### [API_REFERENCE.md](API_REFERENCE.md) - Complete API Documentation
 **Comprehensive reference for all functions and classes**
 - Core model classes (AttentionModel, GraphAttentionEncoder)
 - Problem definition classes (NOOP, StateNOOP)
@@ -30,7 +30,7 @@ Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Or
 - Configuration parameters
 - Error handling and exceptions
 
-### 👨‍💻 [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) - Development Workflow
+### [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) - Development Workflow
 **Guide for developers and contributors**
 - Development environment setup
 - Code structure and standards
@@ -40,7 +40,7 @@ Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Or
 - Performance optimization
 - Contributing guidelines
 
-### 🔍 [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Problem Solving
+### [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Problem Solving
 **Solutions to common issues**
 - Common installation problems
 - Training and performance issues
@@ -49,7 +49,14 @@ Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Or
 - Frequently asked questions
 - Getting help and support
 
-## 🎯 Quick Navigation
+### [AGENTS.md](../AGENTS.md) - AI Agent Instructions
+**Specific instructions for AI coding agents**
+- Agent-specific commands and patterns
+- Common tasks for agents
+- Quick reference for agents
+- Links to detailed documentation
+
+## Quick Navigation
 
 ### For New Users
 1. **Start with** [README.md](README.md) for project overview
@@ -70,7 +77,13 @@ Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Or
 4. **Test** thoroughly using provided test frameworks
 5. **Contribute** following the contribution guidelines
 
-## 🔗 Key Concepts
+### For AI Agents
+1. **Read** [AGENTS.md](../AGENTS.md) for agent-specific instructions
+2. **Reference** [API_REFERENCE.md](API_REFERENCE.md) for implementation details
+3. **Follow** [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) for development workflow
+4. **Check** [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues
+
+## Key Concepts
 
 ### ASOPA Framework
 - **Attention-based neural network** for SIC ordering optimization
@@ -91,7 +104,7 @@ Welcome to the comprehensive documentation for the ASOPA (Attention-Based SIC Or
 - **Comprehensive validation** suite
 - **Extensible architecture** for new research
 
-## 📖 Usage Examples
+## Usage Examples
 
 ### Basic Usage
 ```bash
@@ -123,7 +136,7 @@ from resource_allocation_optimization import my_baseline_method
 decode_order, throughput = my_baseline_method(users)
 ```
 
-## 🛠️ Development Workflow
+## Development Workflow
 
 ### Adding New Features
 1. **Create** new module following code standards
@@ -144,7 +157,7 @@ decode_order, throughput = my_baseline_method(users)
 - **Comprehensive documentation**
 - **Error handling** for edge cases
 
-## 📊 Performance Considerations
+## Performance Considerations
 
 ### Training Optimization
 - **Mixed precision** training for speed
@@ -158,7 +171,7 @@ decode_order, throughput = my_baseline_method(users)
 - **Batch optimization** for throughput
 - **Caching** for repeated computations
 
-## 🔧 Configuration
+## Configuration
 
 ### Key Parameters
 - **Model architecture**: embedding_dim, hidden_dim, n_heads
@@ -172,7 +185,7 @@ decode_order, throughput = my_baseline_method(users)
 - **CUDA 12.1+** for GPU acceleration
 - **CVXOPT** for optimization
 
-## 📈 Extending ASOPA
+## Extending ASOPA
 
 ### Research Directions
 - **New attention mechanisms** for better SIC ordering
@@ -188,7 +201,7 @@ decode_order, throughput = my_baseline_method(users)
 - **Training strategies** in `train.py`
 - **Baseline methods** for comparison
 
-## 🤝 Contributing
+## Contributing
 
 ### How to Contribute
 1. **Fork** the repository
@@ -204,7 +217,7 @@ decode_order, throughput = my_baseline_method(users)
 - **Performance** optimizations
 - **Test coverage** improvements
 
-## 📞 Support
+## Support
 
 ### Getting Help
 - **Check** [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues
@@ -220,7 +233,7 @@ decode_order, throughput = my_baseline_method(users)
 
 ---
 
-## 📝 Documentation Maintenance
+## Documentation Maintenance
 
 This documentation is maintained by the ASOPA development team. For updates, corrections, or suggestions:
 

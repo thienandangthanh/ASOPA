@@ -1,10 +1,22 @@
 # AGENTS.md - AI Coding Agent Instructions
 
-This document provides context and instructions for AI coding agents working on the ASOPA (Attention-Based SIC Ordering and Power Allocation) project.
+This document provides specific instructions and context for AI coding agents working on the ASOPA (Attention-Based SIC Ordering and Power Allocation) project.
+
+## Documentation References
+
+For comprehensive information, refer to:
+- **[Documentation Index](docs/INDEX.md)** - Complete documentation overview
+- **[Architecture Guide](docs/ARCHITECTURE.md)** - System design and technical details
+- **[API Reference](docs/API_REFERENCE.md)** - Complete API documentation
+- **[Development Guide](docs/DEVELOPMENT_GUIDE.md)** - Development environment and workflow
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
 ## Project Overview
 
 **ASOPA** is a deep reinforcement learning framework for optimizing Non-Orthogonal Multiple Access (NOMA) networks. The system uses attention-based neural networks to determine optimal Successive Interference Cancellation (SIC) ordering and convex optimization for power allocation.
+
+### Core Problem
+Maximize weighted proportional fairness in uplink NOMA networks by jointly optimizing SIC ordering and power allocation.
 
 ### Key Technologies
 - **PyTorch 2.3.1** for neural networks (pinned version for compatibility)
@@ -12,40 +24,23 @@ This document provides context and instructions for AI coding agents working on 
 - **CUDA 12.1+** for GPU acceleration
 - **Python 3.8+** as the primary language
 
-### Core Problem
-Maximize weighted proportional fairness in uplink NOMA networks by jointly optimizing SIC ordering and power allocation.
+## DevPod Environment Commands
 
-## Development Environment Setup
+This project uses **DevPod** for consistent development environments. AI agents should use the following commands:
 
-### DevPod Environment
-This project uses **DevPod** for consistent development environments. AI agents should use the following commands to interact with the development environment:
-
-#### Starting the Development Environment
+### Starting the Development Environment
 ```bash
 # Start DevPod environment with VS Code
 devpod up --ide vscode .
 ```
 
-#### Executing Commands in DevPod
-After starting the DevPod environment, AI agents can execute commands remotely using SSH:
+### Remote Command Execution
+AI agents should use this format for remote command execution:
 
 ```bash
 # Basic command execution
-ssh asopa.devpod 'command_here'
+ssh asopa.devpod 'source .venv/bin/activate && command_here'
 
-# Activate Python virtual environment and run commands
-ssh asopa.devpod 'source .venv/bin/activate && python --version'
-ssh asopa.devpod 'source .venv/bin/activate && python run.py --help'
-ssh asopa.devpod 'source .venv/bin/activate && pip list'
-```
-
-#### Important Notes for AI Agents
-1. **Virtual Environment**: Every new shell session requires activating the Python virtual environment with `source .venv/bin/activate`
-2. **Remote Execution**: All Python commands must be executed within the DevPod environment
-3. **Environment Isolation**: The DevPod environment ensures consistent dependencies and configurations across different development sessions
-
-#### Common DevPod Commands for AI Agents
-```bash
 # Check Python version and environment
 ssh asopa.devpod 'source .venv/bin/activate && python --version && which python'
 
@@ -65,6 +60,11 @@ ssh asopa.devpod 'source .venv/bin/activate && python -m pytest tests/'
 ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(torch.cuda.is_available())"'
 ```
 
+### Important Notes for AI Agents
+1. **Virtual Environment**: Every new shell session requires activating the Python virtual environment with `source .venv/bin/activate`
+2. **Remote Execution**: All Python commands must be executed within the DevPod environment
+3. **Environment Isolation**: The DevPod environment ensures consistent dependencies and configurations across different development sessions
+
 ## Project Structure
 
 ```
@@ -73,7 +73,7 @@ ASOPA/
 │   ├── attention_model.py         # Core attention model (MAIN MODEL)
 │   ├── graph_encoder.py           # Graph attention encoder
 │   ├── critic_network.py          # Baseline network
-│   └── pointer_network.py         # Alternative model
+│   └── pointer_network.py          # Alternative model
 ├── problems/                      # Problem definitions
 │   └── noop/                      # NOMA optimization problem
 │       ├── problem_noop.py        # Problem definition & cost calculation
@@ -125,42 +125,6 @@ Input Data → Attention Model → SIC Ordering → Power Allocation → Network
 2. **Power Optimizer**: Solves convex optimization for power allocation
 3. **Problem Definition**: Defines NOMA optimization problem and cost calculation
 4. **Training Pipeline**: Policy gradient training with baseline network
-
-## Coding Guidelines for AI Agents
-
-### Code Style
-- **Follow PEP 8** with type hints
-- **Use meaningful variable names** (e.g., `user_count`, `max_power`)
-- **Add docstrings** for all functions and classes
-- **Include examples** in docstrings when helpful
-
-### PyTorch Best Practices
-```python
-# Always check tensor shapes and devices
-assert input.shape[1] == len(users)
-assert input.device == model.device
-
-# Use proper gradient handling
-with torch.no_grad():
-    # Inference code
-    output = model(input)
-
-# Enable anomaly detection for debugging
-torch.autograd.set_detect_anomaly(True)
-```
-
-### Error Handling
-```python
-# Validate inputs
-if torch.isnan(input).any():
-    raise ValueError("NaN values detected in input")
-if torch.isinf(input).any():
-    raise ValueError("Inf values detected in input")
-
-# Check constraints
-for i, (p, user) in enumerate(zip(power_allocation, users)):
-    assert 0 <= p <= user.p_max, f"Power constraint violated for user {i}"
-```
 
 ## Common Tasks for AI Agents
 
@@ -334,35 +298,35 @@ def monitor_gradients(model):
 ### Training
 ```bash
 # Basic training
-python run.py --n_epochs 300 --graph_size 10
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --n_epochs 300 --graph_size 10'
 
 # Training with specific configuration
-python run.py --model attention --embedding_dim 128 --hidden_dim 128
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --model attention --embedding_dim 128 --hidden_dim 128'
 
 # CPU-only training
-python run.py --no_cuda
+ssh asopa.devpod 'source .venv/bin/activate && python run.py --no_cuda'
 ```
 
 ### Validation
 ```bash
 # Validate pre-trained model
-python ASOPA_validation.py
+ssh asopa.devpod 'source .venv/bin/activate && python ASOPA_validation.py'
 
 # Run baseline comparisons
-python run_baseline.py
+ssh asopa.devpod 'source .venv/bin/activate && python run_baseline.py'
 ```
 
 ### Development
 ```bash
 # Run tests
-pytest tests/
+ssh asopa.devpod 'source .venv/bin/activate && python -m pytest tests/'
 
 # Check code style
-black --check .
-flake8 .
+ssh asopa.devpod 'source .venv/bin/activate && black --check .'
+ssh asopa.devpod 'source .venv/bin/activate && flake8 .'
 
 # Type checking
-mypy nets/ problems/
+ssh asopa.devpod 'source .venv/bin/activate && mypy nets/ problems/'
 ```
 
 ## File Dependencies
@@ -401,20 +365,6 @@ from resource_allocation_optimization import get_optimal_p
 3. **Handle edge cases** gracefully
 4. **Add comprehensive tests** for new functionality
 5. **Update documentation** when adding features
-
-## Support Resources
-
-### Documentation
-- **`docs/README.md`** - Project overview and quick start
-- **`docs/API_REFERENCE.md`** - Complete API documentation
-- **`docs/ARCHITECTURE.md`** - System design details
-- **`docs/DEVELOPMENT_GUIDE.md`** - Development workflow
-- **`docs/TROUBLESHOOTING.md`** - Common issues and solutions
-
-### External Resources
-- [PyTorch Documentation](https://pytorch.org/docs/)
-- [CVXOPT Documentation](https://cvxopt.org/)
-- [Graph Attention Networks Paper](https://arxiv.org/abs/1710.10903)
 
 ## Agent-Specific Instructions
 
@@ -466,5 +416,7 @@ from resource_allocation_optimization import get_optimal_p
 - `resource_allocation_optimization.py`: Optimization
 - `problems/noop/problem_noop.py`: Problem definition
 - `train.py`: Training implementation
+
+---
 
 This document should provide AI coding agents with sufficient context to work effectively on the ASOPA project. For additional details, refer to the comprehensive documentation in the `docs/` directory.

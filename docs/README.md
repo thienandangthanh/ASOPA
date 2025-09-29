@@ -63,6 +63,9 @@ ssh asopa.devpod 'source .venv/bin/activate && pip list'
 git clone <repository-url>
 cd ASOPA
 
+# Start DevPod environment with VS Code
+devpod up --ide vscode .
+
 # Install dependencies (in DevPod environment)
 ssh asopa.devpod 'source .venv/bin/activate && pip install -r requirements.txt'
 
@@ -409,7 +412,6 @@ class MyClass:
 3. **Run full test suite**
 4. **Update documentation**
 5. **Create release tag**
-6. **Publish to PyPI** (if applicable)
 
 ---
 

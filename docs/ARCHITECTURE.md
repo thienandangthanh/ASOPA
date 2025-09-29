@@ -15,16 +15,16 @@ ASOPA implements a **two-stage optimization approach** for NOMA networks:
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Input Data    │───▶│ Attention Model  │───▶│ SIC Ordering   │───▶│ Power Allocation│
-│                 │    │                  │    │                │    │                 │
-│ • Channel gains │    │ • Graph Attention│    │ • Decoding     │    │ • Convex Opt.   │
-│ • User weights  │    │ • Sequential     │    │   Order π      │    │ • CVXOPT Solver │
-│ • Power limits  │    │   Decoding      │    │                │    │                 │
+│   Input Data    │───>│ Attention Model  │───>│ SIC Ordering    │───>│ Power Allocation│
+│                 │    │                  │    │                 │    │                 │
+│ • Channel gains │    │ • Graph Attention│    │ • Decoding      │    │ • Convex Opt.   │
+│ • User weights  │    │ • Sequential     │    │   Order π       │    │ • CVXOPT Solver │
+│ • Power limits  │    │   Decoding       │    │                 │    │                 │
 └─────────────────┘    └──────────────────┘    └─────────────────┘    └─────────────────┘
          │                        │                        │                        │
          ▼                        ▼                        ▼                        ▼
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Data Generation │    │ Feature Learning  │    │ Policy Learning │    │ Network Utility │
+│ Data Generation │    │ Feature Learning │    │ Policy Learning │    │ Network Utility │
 │                 │    │                  │    │                 │    │                 │
 │ • Topology gen  │    │ • Node embedding │    │ • RL Training   │    │ • Weighted PF   │
 │ • Channel model │    │ • Graph encoding │    │ • Policy grad.  │    │ • Performance   │
