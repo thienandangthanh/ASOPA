@@ -1,4 +1,5 @@
 # 构建场景；求解在给定解码顺序下的资源分配问题
+# Build scenarios; solve resource allocation under a given decoding order
 import numpy as np
 # import cvxpy as cp
 from cvxopt import matrix, solvers
@@ -17,64 +18,65 @@ solvers.options['show_progress'] = False
 
 class User:
     def __init__(self, tid, tdecode_order=-1, tp_max=1., tg=0.5, tw=1, td=1):
-        self.id = tid  # 编号
-        self.decode_order = tdecode_order  # 解码顺序
-        self.p_max = tp_max  # 最大的发射功率
-        self.g_hat = tg  # 上行平均信道增益，在每个帧都要乘以一个服从瑞利分布的随机数
+        self.id = tid  # 编号 / ID
+        self.decode_order = tdecode_order  # 解码顺序 / Decoding order
+        self.p_max = tp_max  # 最大的发射功率 / Maximum transmit power
+        self.g_hat = tg  # 上行平均信道增益，在每个帧都要乘以一个服从瑞利分布的随机数 / Average uplink channel gain; multiplied by a Rayleigh RV each frame
         self.w_hat = tw
         self.g = tg
-        self.w = tw  # 吞吐量权重
-        self.d = td  # 到基站的距离
+        self.w = tw  # 吞吐量权重 / Throughput weight
+        self.d = td  # 到基站的距离 / Distance to the base station
 
 
 # 生成拓扑，返回一个用户的list
+# Generate topology; return a list of users
 def generate_topology(user_number=args.user_num, d_min=args.d_min, d_max=args.d_max, w_min=args.w_min,
                       w_max=args.w_max,max_num=10 ):
-    # 暂时假设用户在[d_min,d_max]间均匀分布
+    # 暂时假设用户在[d_min,d_max]间均匀分布 / Temporarily assume users are uniformly distributed in [d_min, d_max]
     d = [(td+1) * (d_max - d_min) / (user_number) + d_min for td in range(user_number)]
-    # 令各用户到基站的距离在d_min到d_max之间随机
+    # 令各用户到基站的距离在d_min到d_max之间随机 / Set each user's distance to the BS randomly between d_min and d_max
     # d = np.random.random([user_number]) * (d_max - d_min) + d_min
-    # 计算各用户的上行平均信道增益，暂时与TMC的计算公式相同
+    # 计算各用户的上行平均信道增益，暂时与TMC的计算公式相同 / Compute each user's average uplink channel gain; same as TMC for now
     g = [4.11 * (3e8 / (4 * math.pi * 915e6 * td)) ** 2.8 for td in d]
     # print(f'\ng={g}')
-    # 暂时令各用户的权重为w_min与w_max交替的形式
+    # 暂时令各用户的权重为w_min与w_max交替的形式 / Temporarily alternate user weights between w_min and w_max
     w = np.ones(user_number)
     # w = [w_min if i % 2 == 0 else w_max for i, _ in enumerate(w)]
-    # 令各用户的权重在w_min与w_max之间随机
+    # 令各用户的权重在w_min与w_max之间随机 / Randomize user weights between w_min and w_max
     # w=np.random.random([user_number])*(w_max-w_min)+w_min
-    # 令用户的权重在[w_min, w_max]之间均匀分布,从小到大
+    # 令用户的权重在[w_min, w_max]之间均匀分布,从小到大 / Evenly space user weights in [w_min, w_max], ascending
     # w = [w_min + i * (w_max - w_min) / (user_number - 1) for i in range(user_number)]
-    # 从大到小
+    # 从大到小 / Descending
     # w = w[::-1]
-    # 令用户的权重从给定的列表中随机选择
+    # 令用户的权重从给定的列表中随机选择 / Randomly choose user weights from a given list
     # w_possible = [1, 4, 16]
-    w_possible = [1, 2, 4, 8, 16, 32] # 现在的基准是这个
+    w_possible = [1, 2, 4, 8, 16, 32] # 现在的基准是这个 / Current baseline
 
-    # w_possible = [1, 32] # 把基准除掉一些
-    # w_possible = [1, 2, 4, 8, 16, 32] # 换成10看看显著不显著
+    # w_possible = [1, 32] # 把基准除掉一些 / Reduce the baseline choices
+    # w_possible = [1, 2, 4, 8, 16, 32] # 换成10看看显著不显著 / Change to 10 to see significance
 
     # w_possible = [1, 2, 4, 8]
     # w_possible = [1, 2 ]
     w_index = np.random.randint(0, len(w_possible), size=user_number)
     w = [w_possible[index] for index in w_index]
-    # # 非随机测试
+    # 非随机测试 / Non-random test
     # w = [1, 3, 3, 1]
-    # 让用户的最大发射功率在1到3之间
+    # 让用户的最大发射功率在1到3之间 / Let users' max transmit power be between 1 and 3
     # p_max = np.random.random(user_number) * 2 + 1
-    # 令用户的发送功率从给定的列表中随机选择
+    # 令用户的发送功率从给定的列表中随机选择 / Randomly choose users' max transmit power from a given list
     # w_possible = [1, 4, 16, 64]
     # p_max_possible = [1,2]
     p_max_possible = [1]
     p_max_index = np.random.randint(0, len(p_max_possible), size=user_number)
     p_max = [p_max_possible[index] for index in p_max_index]
-    # 让用户的最大发送功率为[1,2,1,2,1,2.....]
+    # 让用户的最大发送功率为[1,2,1,2,1,2.....] / Set users' max transmit power to [1,2,1,2,1,2,...]
     # p_max = [1 if i%2==0 else 2 for i in range(user_number)]
     # print(f'd={d}')
     # random.shuffle(w)
     # print(f'w={w}')
     # random.shuffle(p_max)
     # print(f'p_max={p_max}')
-    # 创建用户数组
+    # 创建用户数组 / Create user array
     users = []
     for i in range(user_number):
         users.append(User(tid=i, tp_max=p_max[i], tg=g[i], tw=w[i], td=d[i]))
@@ -85,53 +87,54 @@ def generate_topology(user_number=args.user_num, d_min=args.d_min, d_max=args.d_
     return users
 
 # 生成拓扑，返回一个用户的list
+# Generate topology; return a list of users
 def generate_val_topology(user_number=args.user_num, d_min=args.d_min, d_max=args.d_max, w_min=args.w_min,
                       w_max=args.w_max,max_num=10 ):
-    # 暂时假设用户在[d_min,d_max]间均匀分布
+    # 暂时假设用户在[d_min,d_max]间均匀分布 / Temporarily assume users are uniformly distributed in [d_min, d_max]
     d = [(td+1) * (d_max - d_min) / (user_number) + d_min for td in range(user_number)]
-    # 令各用户到基站的距离在d_min到d_max之间随机
+    # 令各用户到基站的距离在d_min到d_max之间随机 / Set each user's distance to the BS randomly between d_min and d_max
     # d = np.random.random([user_number]) * (d_max - d_min) + d_min
-    # 计算各用户的上行平均信道增益，暂时与TMC的计算公式相同
+    # 计算各用户的上行平均信道增益，暂时与TMC的计算公式相同 / Compute each user's average uplink channel gain; same as TMC for now
     g = [4.11 * (3e8 / (4 * math.pi * 915e6 * td)) ** 2.8 for td in d]
     print(f'\ng={g}')
-    # 暂时令各用户的权重为w_min与w_max交替的形式
+    # 暂时令各用户的权重为w_min与w_max交替的形式 / Temporarily alternate user weights between w_min and w_max
     w = np.ones(user_number)
     # w = [w_min if i % 2 == 0 else w_max for i, _ in enumerate(w)]
-    # 令各用户的权重在w_min与w_max之间随机
+    # 令各用户的权重在w_min与w_max之间随机 / Randomize user weights between w_min and w_max
     # w=np.random.random([user_number])*(w_max-w_min)+w_min
-    # 令用户的权重在[w_min, w_max]之间均匀分布,从小到大
+    # 令用户的权重在[w_min, w_max]之间均匀分布,从小到大 / Evenly space user weights in [w_min, w_max], ascending
     # w = [w_min + i * (w_max - w_min) / (user_number - 1) for i in range(user_number)]
-    # 从大到小
+    # 从大到小 / Descending
     # w = w[::-1]
-    # 令用户的权重从给定的列表中随机选择
+    # 令用户的权重从给定的列表中随机选择 / Randomly choose user weights from a given list
     # w_possible = [1, 4, 16]
-    w_possible = [1, 2, 4, 8, 16, 32] # 现在的基准是这个
+    w_possible = [1, 2, 4, 8, 16, 32] # 现在的基准是这个 / Current baseline
 
-    # w_possible = [1, 32] # 把基准除掉一些
-    # w_possible = [1, 2, 4, 8, 16, 32] # 换成10看看显著不显著
+    # w_possible = [1, 32] # 把基准除掉一些 / Reduce the baseline choices
+    # w_possible = [1, 2, 4, 8, 16, 32] # 换成10看看显著不显著 / Change to 10 to see significance
 
     # w_possible = [1, 2, 4, 8]
     # w_possible = [1, 2 ]
     w_index = np.random.randint(0, len(w_possible), size=user_number)
     w = [w_possible[index] for index in w_index]
-    # # 非随机测试
+    # 非随机测试 / Non-random test
     # w = [1, 3, 3, 1]
-    # 让用户的最大发射功率在1到3之间
+    # 让用户的最大发射功率在1到3之间 / Let users' max transmit power be between 1 and 3
     # p_max = np.random.random(user_number) * 2 + 1
-    # 令用户的发送功率从给定的列表中随机选择
+    # 令用户的发送功率从给定的列表中随机选择 / Randomly choose users' max transmit power from a given list
     # w_possible = [1, 4, 16, 64]
     # p_max_possible = [1,2]
     p_max_possible = [1]
     p_max_index = np.random.randint(0, len(p_max_possible), size=user_number)
     p_max = [p_max_possible[index] for index in p_max_index]
-    # 让用户的最大发送功率为[1,2,1,2,1,2.....]
+    # 让用户的最大发送功率为[1,2,1,2,1,2.....] / Set users' max transmit power to [1,2,1,2,1,2,...]
     # p_max = [1 if i%2==0 else 2 for i in range(user_number)]
     print(f'd={d}')
     # random.shuffle(w)
     print(f'w={w}')
     # random.shuffle(p_max)
     print(f'p_max={p_max}')
-    # 创建用户数组
+    # 创建用户数组 / Create user array
     users = []
     for i in range(user_number):
         users.append(User(tid=i, tp_max=p_max[i], tg=g[i], tw=w[i], td=d[i]))
@@ -140,7 +143,7 @@ def generate_val_topology(user_number=args.user_num, d_min=args.d_min, d_max=arg
     return users
 
 
-# 根据解码顺序对用户进行排序,如果不给定解码顺序就随机排序
+# 根据解码顺序对用户进行排序,如果不给定解码顺序就随机排序 / Sort users by decoding order; if not provided, randomize
 def sort_by_decode_order(users=[], decode_order=None, need_order=False):
     if decode_order is None:
         decode_order = list(range(len(users)))
@@ -151,8 +154,8 @@ def sort_by_decode_order(users=[], decode_order=None, need_order=False):
     return users_order
 
 
-# 所有对比方法都返回其对应的解码顺序，与在这个解码顺序下的最大的总加权alpha吞吐量
-# 对比方案，按照g的升序
+# 所有对比方法都返回其对应的解码顺序，与在这个解码顺序下的最大的总加权alpha吞吐量 / All baselines return their decoding order and the maximum sum weighted alpha throughput under that order
+# 对比方案，按照g的升序 / Baseline: sort by g ascending
 def duibi_g_order_asc(users=[], alpha=None, noise=args.noise):
     a = [(i, tuser.g) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: ta[1])
@@ -163,7 +166,7 @@ def duibi_g_order_asc(users=[], alpha=None, noise=args.noise):
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-# 对比方案，按照g的降序
+# 对比方案，按照g的降序 / Baseline: sort by g descending
 def duibi_g_order_desc(users=[], alpha=None, noise=args.noise):
     a = [(i, tuser.g) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: -ta[1])
@@ -175,7 +178,7 @@ def duibi_g_order_desc(users=[], alpha=None, noise=args.noise):
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-# 对比方案，按照用户权重w的降序
+# 对比方案，按照用户权重w的降序 / Baseline: sort by user weight w descending
 def duibi_w_order_desc(users=[], alpha=None, noise=args.noise):
     a = [(i, tuser.w) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: -ta[1])
@@ -187,7 +190,7 @@ def duibi_w_order_desc(users=[], alpha=None, noise=args.noise):
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-# 对比方案，按照用户权重w的升序
+# 对比方案，按照用户权重w的升序 / Baseline: sort by user weight w ascending
 def duibi_w_order_aesc(users=[], alpha=None, noise=args.noise):
     a = [(i, tuser.w) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: ta[1])
@@ -199,9 +202,9 @@ def duibi_w_order_aesc(users=[], alpha=None, noise=args.noise):
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-# 对比方案，qian的启发式方法（不断找到个最好的位置插入）（默认按照给定的用户顺序进行插入）
+# 对比方案，qian的启发式方法（不断找到个最好的位置插入）（默认按照给定的用户顺序进行插入） / Baseline: Qian's heuristic (iteratively insert at the best position) (default insertion follows the given user order)
 def duibi_heuristic_method_qian(users=[], alpha=None, noise=args.noise, need_random=False):
-    # print('用户状态',users)
+    # print('用户状态 / User state', users)
     if need_random:
         users_cun = copy.deepcopy(users)
         random.shuffle(users)
@@ -228,17 +231,17 @@ def duibi_heuristic_method_qian(users=[], alpha=None, noise=args.noise, need_ran
     return decode_order, max_sum_weighted_alpha_throughput
 
 def duibi_tabu_search_gd(users=[], alpha=None, noise=args.noise, need_random=False):
-    # gd初始
+    # gd初始 / g-desc initialization
     a = [(i, tuser.g) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: -ta[1])
     decode_order = [i for i, _ in a]
-    # wd初始
+    # wd初始 / w-desc initialization
     # a = [(i, tuser.w) for i, tuser in enumerate(users)]
     # a = sorted(a, key=lambda ta: -ta[1])
     # decode_order = [i for i, _ in a]
     # print(f'{decode_order}')
     users = sort_by_decode_order(users=users, decode_order=decode_order)
-    # print('用户状态',users)
+    # print('用户状态 / User state', users)
     if need_random:
         users_cun = copy.deepcopy(users)
         random.shuffle(users)
@@ -278,17 +281,17 @@ def duibi_tabu_search_gd(users=[], alpha=None, noise=args.noise, need_random=Fal
 
 
 def duibi_tabu_search_wd(users=[], alpha=None, noise=args.noise, need_random=False):
-    # gd初始
+    # gd初始 / g-desc initialization
     # a = [(i, tuser.g) for i, tuser in enumerate(users)]
     # a = sorted(a, key=lambda ta: -ta[1])
     # decode_order = [i for i, _ in a]
-    # wd初始
+    # wd初始 / w-desc initialization
     a = [(i, tuser.w) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: -ta[1])
     decode_order = [i for i, _ in a]
     # print(f'{decode_order}')
     users = sort_by_decode_order(users=users, decode_order=decode_order)
-    # print('用户状态',users)
+    # print('用户状态 / User state', users)
     if need_random:
         users_cun = copy.deepcopy(users)
         random.shuffle(users)
@@ -326,11 +329,11 @@ def duibi_tabu_search_wd(users=[], alpha=None, noise=args.noise, need_random=Fal
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-# 对比方法，qian的启发式方法（不断找到个最好的位置插入）（先打乱用户，然后按照打乱之后的用户顺序进行插入）
+# 对比方法，qian的启发式方法（不断找到个最好的位置插入）（先打乱用户，然后按照打乱之后的用户顺序进行插入） / Baseline: Qian's heuristic (insert at the best position; shuffle users first, then insert in that order)
 def duibi_heuristic_method_qian_random(users=[], alpha=None, noise=args.noise):
     return duibi_heuristic_method_qian(users,alpha,noise,need_random=True)
 
-# 对比方案，穷搜
+# 对比方案，穷搜 / Baseline: exhaustive search
 def duibi_exhaustive_search(users=[], alpha=None, noise=args.noise, need_throughput_his=False):
     t_optimal_decode_order = []
     # top15
@@ -383,7 +386,7 @@ def duibi_random(users=[], alpha=None, noise=args.noise, need_throughput_his=Fal
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-# 计算目标吞吐量
+# 计算目标吞吐量 / Compute objective throughput
 def get_objective_throughput(users=[], p=None, alpha=None, noise=args.noise, need_user_throughput_list=False):
     if p is None or alpha is None:
         return 0
@@ -396,7 +399,7 @@ def get_objective_throughput(users=[], p=None, alpha=None, noise=args.noise, nee
                                                   need_user_throughput_list=need_user_throughput_list)
 
 
-# 计算当alpha=1时的目标吞吐量
+# 计算当alpha=1时的目标吞吐量 / Compute objective throughput when alpha=1
 def _get_sum_weighted_ln_throughput(users=[], p=None, noise=args.noise, need_user_throughput_list=False):
     tnoise = noise
     sum_weighted_ln_throughput = 0
@@ -404,7 +407,7 @@ def _get_sum_weighted_ln_throughput(users=[], p=None, noise=args.noise, need_use
     for i, tuser in enumerate(users[::-1]):
         tindex = -i - 1
         user_throughput_list.append(tuser.w * math.log(math.log2(1 + tuser.g * p[tindex] / tnoise)))
-        # # 把目标值改小 【有效果，但不太合理，不好叙述。不如直接把高斯白噪声调了】
+        # 把目标值改小【有效果，但不太合理，不好叙述。不如直接把高斯白噪声调了】 / Reduce the objective value [effective but not reasonable; hard to justify. Better to adjust the Gaussian noise]
         # user_throughput_list.append(tuser.w * math.log(math.log2(1 + tuser.g * p[tindex] / (tnoise*3))))
         sum_weighted_ln_throughput += user_throughput_list[-1]
         # print(f'math.log(math.log2(1 + tuser.g * p[tindex] / tnoise))={math.log(math.log2(1 + tuser.g * p[tindex] / tnoise))}')
@@ -416,7 +419,7 @@ def _get_sum_weighted_ln_throughput(users=[], p=None, noise=args.noise, need_use
     return sum_weighted_ln_throughput
 
 
-# 计算当alpha≠1时的目标吞吐量
+# 计算当alpha≠1时的目标吞吐量 / Compute objective throughput when alpha≠1
 def _get_sum_weighted_alpha_throughput(users=[], p=None, alpha=None, noise=args.noise, need_user_throughput_list=False):
     tnoise = noise
     sum_weighted_alpha_throughput = 0
@@ -434,7 +437,7 @@ def _get_sum_weighted_alpha_throughput(users=[], p=None, alpha=None, noise=args.
     return sum_weighted_alpha_throughput
 
 
-# 获取最大的总加权alpha吞吐量
+# 获取最大的总加权alpha吞吐量 / Get the maximum sum weighted alpha throughput
 def get_max_sum_weighted_alpha_throughput(users=[], alpha=args.alpha, noise=args.noise, use_nlopt=False):
     users_real = []
     for tuser in users:
@@ -446,7 +449,7 @@ def get_max_sum_weighted_alpha_throughput(users=[], alpha=args.alpha, noise=args
     return max_sum_weighted_alpha_throughput
 
 
-# 获取使得总加权alpha吞吐量最大化的功率分配
+# 获取使得总加权alpha吞吐量最大化的功率分配 / Get the power allocation that maximizes the sum weighted alpha throughput
 def get_optimal_p(users=[], alpha=None, noise=args.noise, use_nlopt=False):
     # print(f'alpha={alpha}')
     assert alpha >= 0
@@ -464,7 +467,7 @@ def _get_optimal_p_nlopt(users=[], alpha=None, noise=args.noise, op_algorithm=-1
 
 
 # def _get_optimal_p_nlopt(users=[],alpha=None,noise=args.noise,op_algorithm=nlopt.GN_DIRECT_L):
-#     # 计算目标函数的值与梯度
+#     # 计算目标函数的值与梯度 / Compute objective and gradient
 #     def my_func(x,grad):
 #         user_throughput_list=get_objective_throughput(users,x,alpha,noise)
 #         if grad.size>0:
@@ -484,15 +487,15 @@ def _get_optimal_p_nlopt(users=[], alpha=None, noise=args.noise, op_algorithm=-1
 #
 #     return get_optimal_p()
 
-# 获取在alpha=1时使得总加权alpha吞吐量最大化的功率分配
+# 获取在alpha=1时使得总加权alpha吞吐量最大化的功率分配 / Get power allocation that maximizes the sum weighted alpha throughput when alpha=1
 def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
     user_number = len(users)
     users_g = [(tuser.g, tuser.w) for i,tuser in enumerate(users)]
     # print('users_g',users_g)
 
     def F(x=None, z=None):
-        m = user_number  # 非线性约束的数量
-        n = user_number * 2  # 变量数
+        m = user_number  # 非线性约束的数量 / Number of nonlinear constraints
+        n = user_number * 2  # 变量数 / Number of variables
         if x is None:
             x0 = np.ones([n])
             x0[:user_number] *= 0
@@ -507,13 +510,13 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
         tnoise = noise
         # print('tnoise',tnoise)
         for i, tuser in enumerate(users[::-1]):
-            ti = -i - 1  # 用于索引是第几条约束
-            txi = -i - 1  # 用于x中x_k
-            tyi = txi - user_number  # 用于x中y_k
-            # 目标函数
+            ti = -i - 1  # 用于索引是第几条约束 / Index for the constraint row
+            txi = -i - 1  # 用于x中x_k / Index into x for x_k
+            tyi = txi - user_number  # 用于x中y_k / Index into x for y_k
+            # 目标函数 / Objective
             f_np[0] -= x[txi]
             df_np[0][txi] -= 1
-            # 约束函数
+            # 约束函数 / Constraints
             tsignal = tuser.g * e_x[tyi]
             a = math.e ** (x[txi] / tuser.w)
             # print(f'a={a}')
@@ -557,10 +560,10 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
         tG_np[i][i] = 1
         th_np[i] = math.log(tuser.p_max)
         tG_np[i + user_number][i + user_number] = 1
-        # th_np[i+user_number]=30 # 限制用户可达的最大吞吐量,防止溢出
-        th_np[i + user_number] = 10  # 限制用户可达的最大吞吐量,防止溢出
+        # th_np[i+user_number]=30 # 限制用户可达的最大吞吐量,防止溢出 / Limit max achievable throughput per user to prevent overflow
+        th_np[i + user_number] = 10  # 限制用户可达的最大吞吐量,防止溢出 / Limit max achievable throughput per user to prevent overflow
         # tG_np[i+2*user_number][i+user_number]=-1
-        # th_np[i+2*user_number]=100000 # 限制用户可达的最大吞吐量,防止溢出
+        # th_np[i+2*user_number]=100000 # 限制用户可达的最大吞吐量,防止溢出 / Limit max achievable throughput per user to prevent overflow
     tG = matrix(tG_np)
     th = matrix(th_np)
     solvers.options['show_progress'] = False
@@ -577,16 +580,16 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
     return e_y
 
 
-# 获取在alpha>1时使得总加权alpha吞吐量最大化的功率分配
+# 获取在alpha>1时使得总加权alpha吞吐量最大化的功率分配 / Get power allocation that maximizes the sum weighted alpha throughput for alpha>1
 def _get_optimal_p_alpha_1_infinity(users=[], alpha=None, noise=args.noise):
     return [0] * len(users)
 
 
-# 获取在alpha∈[0,1)时使得总加权alpha吞吐量最大化的功率分配，使用SCA来解决
+# 获取在alpha∈[0,1)时使得总加权alpha吞吐量最大化的功率分配，使用SCA来解决 / Get power allocation that maximizes the sum weighted alpha throughput for alpha∈[0,1); solved via SCA
 def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
     user_num = len(users)
     u = [((1 - alpha) / tuser.w) ** (1 / (1 - alpha)) for tuser in users]
-    # cvxopt需要用到的东西
+    # cvxopt需要用到的东西 / Ingredients required by cvxopt
     tG_np = np.zeros([3 * len(users), 2 * len(users)])
     th_np = np.zeros([3 * len(users), 1])
     for i in range(len(users)):
@@ -601,12 +604,12 @@ def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
     th = matrix(th_np)
 
     def F(x=None, z=None):
-        m = user_num  # 非线性约束的数量
+        m = user_num  # 非线性约束的数量 / Number of nonlinear constraints
         if x is None:
             return m, matrix(np.zeros([2 * len(users)]))
         p = x[:user_num]
         r = x[user_num:]
-        # 计算会重复用到的值
+        # 计算会重复用到的值 / Precompute values reused multiple times
         tmp_f = [noise]
         tmp_z = [noise]
         for i, tuser in enumerate(users[::-1]):
@@ -650,7 +653,7 @@ def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
 
         return f, df, h
 
-    # 求解在给定p[t]的时候最优的p（此时问题为凸优化问题）
+    # 求解在给定p[t]的时候最优的p（此时问题为凸优化问题） / Solve for optimal p given p[t] (convex at this step)
     def get_optimal_p_given_p_t(p):
         global p_t
         p_t = copy.deepcopy(p)
@@ -659,9 +662,9 @@ def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
         p = solvers.cp(F, tG, th)['x'][:len(users)]
         return p
 
-    # 使用sca的方法来求解最优的p
+    # 使用sca的方法来求解最优的p / Use SCA to solve for the optimal p
     def get_optimal_p():
-        # 初始化p=0作为迭代点
+        # 初始化p=0作为迭代点 / Initialize p=0 as the starting point
         p = np.zeros(len(users))
         throughput_1 = get_objective_throughput(users, p, alpha, noise)
         throughput_2 = float('inf')
@@ -675,7 +678,7 @@ def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
     return get_optimal_p()
 
 
-# 从给定的多个排序策略中选出最优的一个排序策略
+# 从给定的多个排序策略中选出最优的一个排序策略 / Select the best ranking policy among the given candidates
 def get_optimal_ranking_policy(users=[], ranking_policies=[[]], alpha=None, noise=args.noise):
     t_optimal_ranking_policy = []
     t_max_throughput = -float('inf')
