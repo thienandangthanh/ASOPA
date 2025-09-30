@@ -133,53 +133,6 @@ ssh asopa.devpod 'source .venv/bin/activate && python -m pytest tests/'
 ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(torch.cuda.is_available())"'
 ```
 
-### IDE Configuration
-
-#### VS Code Setup
-
-Create `.vscode/settings.json`:
-
-```json
-{
-    "python.defaultInterpreterPath": "./asopa_env/bin/python",
-    "python.linting.enabled": true,
-    "python.linting.flake8Enabled": true,
-    "python.formatting.provider": "black",
-    "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": ["tests/"],
-    "files.exclude": {
-        "**/__pycache__": true,
-        "**/*.pyc": true,
-        "**/.pytest_cache": true
-    }
-}
-```
-
-#### PyCharm Setup
-
-1. Open project in PyCharm
-2. Configure Python interpreter to use virtual environment
-3. Enable code inspection and formatting
-4. Set up run configurations for training and validation
-
-### Environment Variables
-
-Create `.env` file:
-
-```bash
-# CUDA settings
-CUDA_VISIBLE_DEVICES=0
-CUDA_LAUNCH_BLOCKING=1
-
-# PyTorch settings
-OMP_NUM_THREADS=4
-MKL_NUM_THREADS=4
-
-# Development settings
-ASOPA_DEBUG=1
-ASOPA_LOG_LEVEL=DEBUG
-```
-
 ### Git Configuration
 
 Set up Git hooks for code quality:
