@@ -22,16 +22,15 @@
   - For Ubuntu: [NVIDIA drivers installation](https://documentation.ubuntu.com/server/how-to/graphics/install-nvidia-drivers/)
   - For ArchLinux: [NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)
 - [DevPod](https://devpod.sh/docs/getting-started/install) for development environment spin up
-- [Visual Studio Code](https://code.visualstudio.com/) or your preferred code editor.
+- [Visual Studio Code](https://code.visualstudio.com/) or your preferred code editor
 - [Git](https://git-scm.com/) for version control
 
-The followings are packed in Dockerfile. But if you want, you can install directly on your machine.
-- Python 3.10 or higher
-- uv as package and project manager
-- PyTorch 2.3.1 (pinned version for compatibility)
-- CUDA 12.1+ (recommended for training)
+### Development Environment Setup
 
-### Initial Setup
+This project uses **DevPod** with Dockerfile and devcontainer.json for consistent development environments.
+The container setup handles all the heavy lifting including Python, CUDA, and dependency installation.
+
+#### Quick Start
 
 1. **Clone the repository**:
    ```bash
@@ -39,77 +38,54 @@ The followings are packed in Dockerfile. But if you want, you can install direct
    cd ASOPA
    ```
 
-2. **Create virtual environment**:
+2. **Start DevPod environment**:
    ```bash
-   uv venv .venv
-   source .venv/bin/activate  # On Windows CMD: .venv\bin\activate.bat
+   # Start DevPod environment with your preferred IDE
+   devpod up --ide none .       # none - no IDE integration or Vim/Neovim
+   devpod up --ide vscode .     # VS Code
+   devpod up --ide openvscode . # VS Code Browser
+   devpod up --ide pycharm .    # JetBrains PyCharm
    ```
 
-3. **Install dependencies**:
-   ```bash
-   uv pip install -r requirements.txt
-   ```
+3. **Access the development environment**:
+   After starting DevPod, you can access the container in two ways:
 
-4. **Verify installation**:
+   **Option A: Direct terminal access (for human developers)**
    ```bash
+   # Connect to interactive shell
+   ssh asopa.devpod
+
+   # Activate virtual environment (required for each new session)
+   source .venv/bin/activate
+
+   # Verify installation
+   python --version
    python -c "import torch; print(f'PyTorch: {torch.__version__}')"
    python -c "import cvxopt; print('CVXOPT: OK')"
    # Expected PyTorch version: 2.3.1
    ```
 
-## Development Environment
-
-### DevPod Environment Setup
-
-This project uses **DevPod** for consistent development environments. Follow these steps to set up and use the DevPod environment:
-
-#### Starting DevPod Environment
-
-```bash
-# Start DevPod environment with VS Code
-devpod up --ide vscode .
-```
-
-#### Executing Commands in DevPod
-
-After starting the DevPod environment, you can access it in two ways:
-
-##### For Human Developers (Interactive Shell)
-Connect to an interactive bash shell in the DevPod environment:
-
-```bash
-# Connect to interactive shell
-ssh asopa.devpod
-
-# Once connected, activate virtual environment
-source .venv/bin/activate
-
-# Now you can run commands directly
-python --version
-python run.py --help
-uv pip list
-```
-
-##### For AI Agents (Remote Command Execution)
-AI agents should use the command template for remote execution:
-
-```bash
-# AI agents use this format for remote command execution
-ssh asopa.devpod 'source .venv/bin/activate && python --version'
-ssh asopa.devpod 'source .venv/bin/activate && python run.py --help'
-ssh asopa.devpod 'source .venv/bin/activate && pip list'
-```
+   **Option B: Remote command execution (for AI agents)**
+   ```bash
+   # AI agents use this format for remote command execution
+   ssh asopa.devpod 'source .venv/bin/activate && python --version'
+   ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(torch.__version__)"'
+   ```
 
 #### Important Notes
 
 1. **Virtual Environment**: Every new shell session requires activating the Python virtual environment with `source .venv/bin/activate`
-2. **Remote Execution**: All Python commands must be executed within the DevPod environment
-3. **Environment Isolation**: The DevPod environment ensures consistent dependencies and configurations across different development sessions
-4. **Interactive vs Remote**: Human developers can use interactive SSH sessions, while AI agents use remote command execution
+2. **Environment Isolation**: The DevPod environment ensures consistent dependencies and configurations across different development sessions
+3. **IDE Integration**: Your preferred IDE will automatically connect to the container with remote development capabilities
+4. **Pre-configured Environment**: The Dockerfile and devcontainer.json have already set up:
+   - Python 3.10+ with uv package manager
+   - PyTorch 2.3.1 (pinned version for compatibility)
+   - CUDA 12.1+ support
+   - All project dependencies from requirements.txt
 
-#### Common DevPod Commands
+#### Common Development Commands
 
-##### For Human Developers (Interactive Shell)
+**For Human Developers (Interactive Shell)**
 ```bash
 # Connect to DevPod
 ssh asopa.devpod
@@ -136,7 +112,7 @@ python -m pytest tests/
 python -c "import torch; print(torch.cuda.is_available())"
 ```
 
-##### For AI Agents (Remote Command Execution)
+**For AI Agents (Remote Command Execution)**
 ```bash
 # Check Python version and environment
 ssh asopa.devpod 'source .venv/bin/activate && python --version && which python'
