@@ -2,7 +2,8 @@
 
 ## Table of Contents
 - [Getting Started](#getting-started)
-- [Development Environment](#development-environment)
+  - [Prerequisites](#prerequisites)
+  - [Development Environment Setup](#development-environment-setup)
 - [Code Structure](#code-structure)
 - [Adding New Features](#adding-new-features)
 - [Testing](#testing)
