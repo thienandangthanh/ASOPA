@@ -14,11 +14,22 @@
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- [Docker](https://www.docker.com/get-started/) or [Podman](https://podman.io/) for containerized development environment
+  - For Windows, [Windows Subsytem for Linux (WSL 2)](https://learn.microsoft.com/en-us/windows/wsl/install) must be installed.
+    Read [Docker Desktop WSL 2 backend on Windows](https://docs.docker.com/desktop/features/wsl/) for more info.
+- NVIDIA CUDA driver
+  - For Windows: [NVIDIA CUDA enabled driver for WSL](https://learn.microsoft.com/en-us/windows/ai/directml/gpu-cuda-in-wsl)
+  - For Ubuntu: [NVIDIA drivers installation](https://documentation.ubuntu.com/server/how-to/graphics/install-nvidia-drivers/)
+  - For ArchLinux: [NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA)
+- [DevPod](https://devpod.sh/docs/getting-started/install) for development environment spin up
+- [Visual Studio Code](https://code.visualstudio.com/) or your preferred code editor.
+- [Git](https://git-scm.com/) for version control
+
+The followings are packed in Dockerfile. But if you want, you can install directly on your machine.
+- Python 3.10 or higher
 - uv as package and project manager
 - PyTorch 2.3.1 (pinned version for compatibility)
 - CUDA 12.1+ (recommended for training)
-- Git for version control
 
 ### Initial Setup
 
@@ -77,7 +88,6 @@ source .venv/bin/activate
 python --version
 python run.py --help
 uv pip list
-python run.py --n_epochs 10 --graph_size 5
 ```
 
 ##### For AI Agents (Remote Command Execution)
