@@ -1056,66 +1056,7 @@ class EarlyStopping:
 
 ## Contributing Guidelines
 
-### Development Workflow
-
-1. **Fork the repository**
-2. **Create feature branch**: `git checkout -b feature/my-feature`
-3. **Make changes** following coding standards
-4. **Add tests** for new functionality
-5. **Update documentation**
-6. **Run test suite**: `pytest`
-7. **Submit pull request**
-
-### Code Review Process
-
-#### Before Submitting
-
-- [ ] Code follows PEP 8 style guide
-- [ ] All tests pass
-- [ ] New features have tests
-- [ ] Documentation is updated
-- [ ] No hardcoded values
-- [ ] Error handling is implemented
-- [ ] Performance is acceptable
-
-#### Review Checklist
-
-- [ ] Code is readable and well-commented
-- [ ] Architecture is sound
-- [ ] Tests are comprehensive
-- [ ] Documentation is clear
-- [ ] Performance impact is considered
-- [ ] Backward compatibility is maintained
-
-### Release Process
-
-1. **Update version numbers**
-2. **Update CHANGELOG.md**
-3. **Run full test suite**
-4. **Update documentation**
-5. **Create release tag**
-6. **Publish release notes**
-
-### Issue Reporting
-
-When reporting issues, include:
-
-- **Environment**: OS, Python version, PyTorch version
-- **Steps to reproduce**: Clear, minimal steps
-- **Expected behavior**: What should happen
-- **Actual behavior**: What actually happens
-- **Error messages**: Full error traceback
-- **Code**: Minimal code to reproduce the issue
-
-### Feature Requests
-
-When requesting features, include:
-
-- **Use case**: Why is this feature needed?
-- **Proposed solution**: How should it work?
-- **Alternatives**: What other approaches were considered?
-- **Implementation**: Any implementation ideas?
-- **Testing**: How should it be tested?
+For comprehensive contribution guidelines, including development workflow, code review process, and release process please refer to the dedicated [Contributing Guide](CONTRIBUTING.md).
 
 ---
 
