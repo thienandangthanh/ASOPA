@@ -41,7 +41,7 @@ def show_order_influence():
     plt.legend()
     plt.xlabel("user number")
     plt.ylabel("throughput")
-    plt.title(f"d\in$[{d_min,d_max}]$")
+    plt.title(f"d\in$[{d_min, d_max}]$")
     plt.show()
 
 
@@ -137,12 +137,10 @@ def show_speed_performance_dataset(dataset):
                 except BaseException as e:
                     no_error = False
                     print(f"e={e}")
-                    break
+                    break  # Exit loop early; remaining methods won't be executed for this frame
                 time_end = time.time()
                 t_speed_list.append(time_end - time_start)
                 t_performance_list.append(t_throuhput)
-                speed_his[method_name].append(time_end - time_start)
-                performance_his[method_name].append(t_throuhput)
                 # './Top15/n%d_top15_1.mat' % (user_num)
 
                 if "duibi_exhaustive_search" in methods:
@@ -174,12 +172,19 @@ def show_speed_performance_dataset(dataset):
                         # print(f'e={e},等待生成...')
 
         # if no_error:
+        # Record results for all methods that completed successfully in this frame.
+        # Bounds checking prevents IndexError when a method fails and breaks early.
         for i, method_name in enumerate(methods.keys()):
             # 若没有出错，说明已经生成了top15mat，则不再穷搜，也无穷搜数值
             # if method_name == 'duibi_exhaustive_search':
             #     continue
-            speed_his[method_name].append(t_speed_list[i])
-            performance_his[method_name].append(t_performance_list[i])
+            if i < len(t_speed_list) and i < len(t_performance_list):
+                speed_his[method_name].append(t_speed_list[i])
+                performance_his[method_name].append(t_performance_list[i])
+            else:
+                print(
+                    f"Warning: Skipping recording for {method_name} due to incomplete results"
+                )
 
     # for method_name in methods.keys():
     print(f"Speed：")
@@ -231,7 +236,7 @@ if __name__ == "__main__":
     speed_his, performance_his = show_speed_performance(users_g)
     print(f"速度：")
     for k, v in speed_his.items():
-        print(f"{k}:{sum(v)/len(v)}")
+        print(f"{k}:{sum(v) / len(v)}")
     print(f"性能：")
     for k, v in performance_his.items():
-        print(f"{k}:{sum(v)/len(v)}")
+        print(f"{k}:{sum(v) / len(v)}")
