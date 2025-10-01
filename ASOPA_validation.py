@@ -30,16 +30,22 @@ def run(opts):
     opts.device = torch.device("cuda:0" if opts.use_cuda else "cpu")
 
     # Figure out what's the problem
-    problem =load_problem(opts.problem)
+    problem = load_problem(opts.problem)
 
     validate_epoch = args.val_epoch
     # Load model with weights_only=False for compatibility with older PyTorch model files
     # This is safe since we trust the source of this checkpoint
-    model= torch.load('Variable_user_n10_epoch{}.pth'.format(validate_epoch), weights_only=False)
+    model = torch.load(
+        "Variable_user_n10_epoch{}.pth".format(validate_epoch), weights_only=False
+    )
     # Move model to the correct device
     model = model.to(opts.device)
     val_dataset = problem.load_val_dataset(
-            size=opts.graph_size, num_samples=opts.val_size, filename=opts.val_dataset, distribution=opts.data_distribution)
+        size=opts.graph_size,
+        num_samples=opts.val_size,
+        filename=opts.val_dataset,
+        distribution=opts.data_distribution,
+    )
     opts.eval_batch_size = 1
     time_start = time.time()
     validate(model, val_dataset, opts)

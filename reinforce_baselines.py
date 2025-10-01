@@ -5,6 +5,7 @@ from scipy.stats import ttest_rel
 import copy
 from train import rollout, get_inner_model
 
+
 class Baseline(object):
 
     def wrap_dataset(self, dataset):
@@ -31,7 +32,12 @@ class Baseline(object):
 
 class WarmupBaseline(Baseline):
 
-    def __init__(self, baseline, n_epochs=1, warmup_exp_beta=0.8, ):
+    def __init__(
+        self,
+        baseline,
+        n_epochs=1,
+        warmup_exp_beta=0.8,
+    ):
         super(Baseline, self).__init__()
 
         self.baseline = baseline
@@ -59,7 +65,9 @@ class WarmupBaseline(Baseline):
         v, l = self.baseline.eval(x, c)
         vw, lw = self.warmup_baseline.eval(x, c)
         # Return convex combination of baseline and of loss
-        return self.alpha * v + (1 - self.alpha) * vw, self.alpha * l + (1 - self.alpha * lw)
+        return self.alpha * v + (1 - self.alpha) * vw, self.alpha * l + (
+            1 - self.alpha * lw
+        )
 
     def epoch_callback(self, model, epoch):
         # Need to call epoch callback of inner model (also after first epoch if we have not used it)
@@ -97,19 +105,16 @@ class ExponentialBaseline(Baseline):
         if self.v is None:
             v = c.mean()
         else:
-            v = self.beta * self.v + (1. - self.beta) * c.mean()
+            v = self.beta * self.v + (1.0 - self.beta) * c.mean()
 
         self.v = v.detach()  # Detach since we never want to backprop
         return self.v, 0  # No loss
 
     def state_dict(self):
-        return {
-            'v': self.v
-        }
+        return {"v": self.v}
 
     def load_state_dict(self, state_dict):
-        self.v = state_dict['v']
-
+        self.v = state_dict["v"]
 
 
 class RolloutBaseline(Baseline):
@@ -131,11 +136,15 @@ class RolloutBaseline(Baseline):
         # print(dataset)
         # Need to convert baseline to 2D to prevent converting to double, see
         # https://discuss.pytorch.org/t/dataloader-gives-double-instead-of-float/717/3
-        a = BaselineDataset(dataset, rollout(self.model, dataset, self.opts).view(-1, 1))
+        a = BaselineDataset(
+            dataset, rollout(self.model, dataset, self.opts).view(-1, 1)
+        )
         return a
 
     def unwrap_batch(self, batch):
-        return batch['data'], batch['baseline'].view(-1)  # Flatten result to undo wrapping as 2D
+        return batch["data"], batch["baseline"].view(
+            -1
+        )  # Flatten result to undo wrapping as 2D
 
     def eval(self, x, c):
         # Use volatile mode for efficient inference (single batch so we do not use rollout function)
@@ -156,7 +165,7 @@ class RolloutBaseline(Baseline):
 
     def state_dict(self):
         return {
-            'model': self.model,
+            "model": self.model,
             # 'dataset': self.dataset,
             # 'epoch': self.epoch
         }
@@ -164,8 +173,10 @@ class RolloutBaseline(Baseline):
     def load_state_dict(self, state_dict):
         # We make it such that it works whether model was saved as data parallel or not
         load_model = copy.deepcopy(self.model)
-        get_inner_model(load_model).load_state_dict(get_inner_model(state_dict['model']).state_dict())
-        self._update_model(load_model, state_dict['epoch'], state_dict['dataset'])
+        get_inner_model(load_model).load_state_dict(
+            get_inner_model(state_dict["model"]).state_dict()
+        )
+        self._update_model(load_model, state_dict["epoch"], state_dict["dataset"])
 
 
 class BaselineDataset(Dataset):
@@ -175,13 +186,10 @@ class BaselineDataset(Dataset):
 
         self.dataset = dataset
         self.baseline = baseline
-        assert (len(self.dataset) == len(self.baseline))
+        assert len(self.dataset) == len(self.baseline)
 
     def __getitem__(self, item):
-        return {
-            'data': self.dataset[item],
-            'baseline': self.baseline[item]
-        }
+        return {"data": self.dataset[item], "baseline": self.baseline[item]}
 
     def __len__(self):
         return len(self.dataset)
