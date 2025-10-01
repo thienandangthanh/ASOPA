@@ -31,19 +31,18 @@ class StateNOOP(NamedTuple):
             first_a=prev_a,
             prev_a=prev_a,
             visited_=(
-                torch.zeros(
-                    batch_size, 1, n_g,
-                    dtype=torch.uint8, device=g.device
-                )
+                torch.zeros(batch_size, 1, n_g, dtype=torch.uint8, device=g.device)
             ),
-            i=torch.zeros(1, dtype=torch.int64, device=g.device)
+            i=torch.zeros(1, dtype=torch.int64, device=g.device),
         )
 
     def update(self, selected):
         prev_a = selected[:, None]
         first_a = prev_a if self.i.item() == 0 else self.first_a
         visited_ = self.visited_.scatter(-1, prev_a[:, :, None], 1)
-        return self._replace(first_a=first_a, prev_a=prev_a, visited_=visited_, i=self.i + 1)
+        return self._replace(
+            first_a=first_a, prev_a=prev_a, visited_=visited_, i=self.i + 1
+        )
 
     def all_finished(self):
         # Exactly n steps
@@ -53,4 +52,6 @@ class StateNOOP(NamedTuple):
         return self.prev_a
 
     def get_mask(self):
-        return self.visited > 0  # Hacky way to return bool or uint8 depending on pytorch version
+        return (
+            self.visited > 0
+        )  # Hacky way to return bool or uint8 depending on pytorch version

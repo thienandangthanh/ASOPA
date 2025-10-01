@@ -8,6 +8,7 @@ from functools import reduce
 
 from conf import args
 from utils import *
+
 # from network.data_generate import *
 from data_generate import *
 from pointer_network import *
@@ -16,32 +17,34 @@ from network.pointer_network_2 import NeuralCombOptRL
 
 
 def val_duibi(model, val_dataloader, use_qf=True, use_qs=False):
-    if args.user_num<=5:
-        use_qs=True
-    reward_map=defaultdict(list)
-    time_map=defaultdict(int)
+    if args.user_num <= 5:
+        use_qs = True
+    reward_map = defaultdict(list)
+    time_map = defaultdict(int)
     for batch_data in val_dataloader:
         users_g = batch_data.cpu().numpy()
         batch_data = batch_data.float().to(device).unsqueeze(1)
-        t_start=time.time()
+        t_start = time.time()
         _, _, _, pointers = model(batch_data)
         pointers = np.asarray([t.numpy() for t in pointers]).transpose()
         reward_map[0].extend(get_reward(users, users_g, pointers))
-        time_map[0]+=time.time()-t_start
-        duibi_ffs=[duibi_g_order_asc,duibi_g_order_desc]
+        time_map[0] += time.time() - t_start
+        duibi_ffs = [duibi_g_order_asc, duibi_g_order_desc]
         if use_qf:
             duibi_ffs.append(duibi_heuristic_method_qian)
         if use_qs:
             duibi_ffs.append(duibi_exhaustive_search)
-        for i,ff in enumerate(duibi_ffs):
-            i+=1
-            time_start=time.time()
+        for i, ff in enumerate(duibi_ffs):
+            i += 1
+            time_start = time.time()
             for t in tqdm(batch_data):
                 set_users_g(users, t[0])
-                _,tt=ff(users,alpha=args.alpha)
+                _, tt = ff(users, alpha=args.alpha)
                 reward_map[i].append(tt)
-            time_map[i]+=time.time()-time_start
-    return reduce(lambda x,y:x.__add__(y),[[reward_map[i],time_map[i]] for i in range(5)])
+            time_map[i] += time.time() - time_start
+    return reduce(
+        lambda x, y: x.__add__(y), [[reward_map[i], time_map[i]] for i in range(5)]
+    )
 
 
 # 固定随机种子
@@ -49,12 +52,16 @@ seed_everything(args.seed)
 # 生成拓扑
 users = generate_topology(args.user_num, args.d_min, args.d_max, args.w_min, args.w_max)
 # 构建训练集与验证集
-train_dataloader = get_dataloader(users, data_num=args.train_data_num, batch_size=args.train_batch_size, shuffle=True)
-val_dataloader = get_dataloader(users, data_num=args.val_data_num, batch_size=args.val_batch_size, shuffle=False)
+train_dataloader = get_dataloader(
+    users, data_num=args.train_data_num, batch_size=args.train_batch_size, shuffle=True
+)
+val_dataloader = get_dataloader(
+    users, data_num=args.val_data_num, batch_size=args.val_batch_size, shuffle=False
+)
 # 定义网络
 # model=get_pointer_network(embedding_dim=args.embedding_dim,hidden_dim=args.hidden_dim,use_cuda=args.use_cuda)
 model = NeuralCombOptRL()
-device = 'cuda' if args.use_cuda else 'cpu'
+device = "cuda" if args.use_cuda else "cpu"
 # 与训练相关的
 lr = args.lr
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -73,10 +80,14 @@ for epoch in range(args.epoch_num):
         reward = get_reward(users, users_g, pointers)
         if batch_i == 0:
             reward_mean = reward.mean()
-            print(f'reward.mean()={reward.mean()}')
+            print(f"reward.mean()={reward.mean()}")
         else:
-            print(f'epoch={epoch},reward_mean={reward_mean},reward.mean()={reward.mean()}')
-            reward_mean = reward_mean * args.reward_beta + (1 - args.reward_beta) * reward.mean()
+            print(
+                f"epoch={epoch},reward_mean={reward_mean},reward.mean()={reward.mean()}"
+            )
+            reward_mean = (
+                reward_mean * args.reward_beta + (1 - args.reward_beta) * reward.mean()
+            )
         advantage = torch.tensor(reward - reward_mean).to(device)
         # advantage = torch.tensor(reward - 55.9).to(device)
         # nn.Transformer
@@ -125,11 +136,13 @@ for epoch in range(args.epoch_num):
 #     print(f'para:{parmas}')
 #     print(f'grad_value:{parmas.grad}')
 # torch.save(model.state_dict(),time.strftime('%Y-%m-%d %H:%M:%S')+f'user_num_{args.user_num}_epoch_{epoch}.pth')
-torch.save(model.state_dict(),f'user_num_{args.user_num}_epoch_{epoch}.pth')
+torch.save(model.state_dict(), f"user_num_{args.user_num}_epoch_{epoch}.pth")
 
-reward,t_1, t_asc,t_2, t_desc,t_3, t_qf, t_4,t_qs,t_5=val_duibi(model,val_dataloader)
-print(f'我们的方法:{sum(reward)/len(reward)},耗时{t_1}')
-print(f'信道质量升序:{sum(t_asc)/len(reward)},耗时{t_2}')
-print(f'信道质量降序:{sum(t_desc)/len(reward)},耗时{t_3}')
-print(f'qian的启发式方法:{sum(t_qf)/len(reward)},耗时{t_4}')
-print(f'穷搜的方法:{sum(t_qs)/len(reward)},耗时{t_5}')
+reward, t_1, t_asc, t_2, t_desc, t_3, t_qf, t_4, t_qs, t_5 = val_duibi(
+    model, val_dataloader
+)
+print(f"我们的方法:{sum(reward)/len(reward)},耗时{t_1}")
+print(f"信道质量升序:{sum(t_asc)/len(reward)},耗时{t_2}")
+print(f"信道质量降序:{sum(t_desc)/len(reward)},耗时{t_3}")
+print(f"qian的启发式方法:{sum(t_qf)/len(reward)},耗时{t_4}")
+print(f"穷搜的方法:{sum(t_qs)/len(reward)},耗时{t_5}")

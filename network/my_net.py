@@ -7,6 +7,7 @@ from my_utils import *
 from resource_allocation_optimization import *
 from network.pointer_network import get_pointer_network, PointerNet
 from tqdm import tqdm
+
 # from numba import jit
 
 
@@ -16,11 +17,14 @@ def get_reward(users, g, decode_order, alpha=args.alpha, noise=args.noise):
     for t_g, t_decode_order in tqdm(zip(g, decode_order)):
         set_users_g(users, t_g)
         users_order = sort_by_decode_order(users, t_decode_order)
-        reward = get_max_sum_weighted_alpha_throughput(users=users_order, alpha=alpha, noise=noise)
+        reward = get_max_sum_weighted_alpha_throughput(
+            users=users_order, alpha=alpha, noise=noise
+        )
         reward_list.append(reward)
         # reward = get_max_sum_weighted_alpha_throughput(users=users_order, alpha=alpha, noise=noise,use_nlopt=True)
         # reward_list.append(reward)
     return np.asarray(reward_list)
+
 
 # sl=100
 # args.user_num=8

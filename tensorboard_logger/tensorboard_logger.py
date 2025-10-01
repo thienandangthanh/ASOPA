@@ -10,10 +10,11 @@ import numpy as np
 import six
 
 import scipy.misc
+
 try:
     from StringIO import StringIO  # Python 2.7
 except ImportError:
-    from io import BytesIO         # Python 3.x
+    from io import BytesIO  # Python 3.x
 
 try:
     from tensorflow.core.util import event_pb2
@@ -23,11 +24,11 @@ except ImportError:
 from .crc32c import crc32c
 
 
-__all__ = ['Logger', 'configure', 'log_value', 'log_histogram', 'log_images']
+__all__ = ["Logger", "configure", "log_value", "log_histogram", "log_images"]
 
 
-_VALID_OP_NAME_START = re.compile('^[A-Za-z0-9.]')
-_VALID_OP_NAME_PART = re.compile('[A-Za-z0-9_.\\-/]+')
+_VALID_OP_NAME_START = re.compile("^[A-Za-z0-9.]")
+_VALID_OP_NAME_PART = re.compile("[A-Za-z0-9_.\\-/]+")
 
 
 class Logger(object):
@@ -46,16 +47,19 @@ class Logger(object):
                 os.makedirs(self.logdir)
             hostname = socket.gethostname()
             filename = os.path.join(
-                self.logdir, 'events.out.tfevents.{}.{}'.format(
-                    int(self._time()), hostname))
-            self._writer = open(filename, 'wb')
-            self._write_event(event_pb2.Event(
-                wall_time=self._time(), step=0, file_version='brain.Event:2'))
+                self.logdir,
+                "events.out.tfevents.{}.{}".format(int(self._time()), hostname),
+            )
+            self._writer = open(filename, "wb")
+            self._write_event(
+                event_pb2.Event(
+                    wall_time=self._time(), step=0, file_version="brain.Event:2"
+                )
+            )
 
     def _ensure_tf_name(self, name):
         if not isinstance(name, six.string_types):
-            raise TypeError('"name" should be a string, got {}'
-                            .format(type(name)))
+            raise TypeError('"name" should be a string, got {}'.format(type(name)))
         try:
             tf_name = self._name_to_tf_name[name]
         except KeyError:
@@ -65,8 +69,7 @@ class Logger(object):
 
     def _check_step(self, step):
         if step is not None and not isinstance(step, six.integer_types):
-            raise TypeError('"step" should be an integer, got {}'
-                            .format(type(step)))
+            raise TypeError('"step" should be an integer, got {}'.format(type(step)))
 
     def log_value(self, name, value, step=None):
         """Log new value for given name on given step.
@@ -81,8 +84,7 @@ class Logger(object):
                 not checked).
         """
         if isinstance(value, six.string_types):
-            raise TypeError('"value" should be a number, got {}'
-                            .format(type(value)))
+            raise TypeError('"value" should be a number, got {}'.format(type(value)))
         value = float(value)
 
         self._check_step(step)
@@ -103,8 +105,7 @@ class Logger(object):
             step (int): non-negative integer used for visualization
         """
         if isinstance(value, six.string_types):
-            raise TypeError('"value" should be a number, got {}'
-                            .format(type(value)))
+            raise TypeError('"value" should be a number, got {}'.format(type(value)))
 
         self._check_step(step)
         tf_name = self._ensure_tf_name(name)
@@ -122,8 +123,9 @@ class Logger(object):
             step (int): non-negative integer used for visualization
         """
         if isinstance(images, six.string_types):
-            raise TypeError('"images" should be a list of ndarrays, got {}'
-                            .format(type(images)))
+            raise TypeError(
+                '"images" should be a list of ndarrays, got {}'.format(type(images))
+            )
 
         self._check_step(step)
         tf_name = self._ensure_tf_name(name)
@@ -160,11 +162,12 @@ class Logger(object):
             img_sum = summary_pb2.Summary.Image(
                 encoded_image_string=s.getvalue(),
                 height=img.shape[0],
-                width=img.shape[1]
+                width=img.shape[1],
             )
             # Create a Summary value
-            img_value = summary_pb2.Summary.Value(tag='{}/{}'.format(tf_name, i),
-                                                  image=img_sum)
+            img_value = summary_pb2.Summary.Value(
+                tag="{}/{}".format(tf_name, i), image=img_sum
+            )
             img_summaries.append(img_value)
             summary = summary_pb2.Summary()
             summary.value.add(tag=tf_name, image=img_sum)
@@ -198,8 +201,9 @@ class Logger(object):
         """
         if isinstance(value, tuple):
             bin_edges, bincounts = value
-            assert len(bin_edges) == len(bincounts) + 1, (
-                'must have one more edge than count')
+            assert (
+                len(bin_edges) == len(bincounts) + 1
+            ), "must have one more edge than count"
             hist = summary_pb2.HistogramProto()
             hist.min = float(min(bin_edges))
             hist.max = float(max(bin_edges))
@@ -234,7 +238,7 @@ class Logger(object):
         tf_base_name = tf_name = make_valid_tf_name(name)
         i = 1
         while tf_name in self._tf_names:
-            tf_name = '{}/{}'.format(tf_base_name, i)
+            tf_name = "{}/{}".format(tf_base_name, i)
             i += 1
         self._tf_names.add(tf_name)
         return tf_name
@@ -252,11 +256,11 @@ class Logger(object):
         data = event.SerializeToString()
         # See RecordWriter::WriteRecord from record_writer.cc
         w = self._writer.write
-        header = struct.pack('Q', len(data))
+        header = struct.pack("Q", len(data))
         w(header)
-        w(struct.pack('I', masked_crc32c(header)))
+        w(struct.pack("I", masked_crc32c(header)))
         w(data)
-        w(struct.pack('I', masked_crc32c(data)))
+        w(struct.pack("I", masked_crc32c(data)))
         self._writer.flush()
 
     def _time(self):
@@ -269,39 +273,40 @@ class Logger(object):
 
 def masked_crc32c(data):
     x = u32(crc32c(data))
-    return u32(((x >> 15) | u32(x << 17)) + 0xa282ead8)
+    return u32(((x >> 15) | u32(x << 17)) + 0xA282EAD8)
 
 
 def u32(x):
-    return x & 0xffffffff
+    return x & 0xFFFFFFFF
 
 
 def make_valid_tf_name(name):
     if not _VALID_OP_NAME_START.match(name):
         # Must make it valid somehow, but don't want to remove stuff
-        name = '.' + name
-    return '_'.join(_VALID_OP_NAME_PART.findall(name))
+        name = "." + name
+    return "_".join(_VALID_OP_NAME_PART.findall(name))
 
 
 _default_logger = None  # type: Logger
 
 
 def configure(logdir, flush_secs=2):
-    """ Configure logging: a file will be written to logdir, and flushed
+    """Configure logging: a file will be written to logdir, and flushed
     every flush_secs.
     """
     global _default_logger
     if _default_logger is not None:
-        raise ValueError('default logger already configured')
+        raise ValueError("default logger already configured")
     _default_logger = Logger(logdir, flush_secs=flush_secs)
 
 
 def _check_default_logger():
     if _default_logger is None:
         raise ValueError(
-            'default logger is not configured. '
-            'Call tensorboard_logger.configure(logdir), '
-            'or use tensorboard_logger.Logger')
+            "default logger is not configured. "
+            "Call tensorboard_logger.configure(logdir), "
+            "or use tensorboard_logger.Logger"
+        )
 
 
 def log_value(name, value, step=None):
@@ -317,5 +322,6 @@ def log_histogram(name, value, step=None):
 def log_images(name, images, step=None):
     _check_default_logger()
     _default_logger.log_images(name, images, step=step)
+
 
 log_value.__doc__ = Logger.log_value.__doc__
