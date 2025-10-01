@@ -241,21 +241,12 @@ def train_batch(
     # print('bl_val:',bl_val,'bl_loss:',bl_loss)
     # print('bl_val:',type(bl_val),'bl_loss:',bl_loss)
 
-    # Calculate loss
-    baseline_gap = []
+    # Calculate REINFORCE loss with advantage clipping
+    # advantage = cost - baseline, clipped to [-1, 1] for stability
+    # This prevents extreme gradients when cost deviates significantly from baseline
     c_reward = 1
-    for i in range(len(cost)):
-        if cost[i] < bl_val[i]:
-            if cost[i] - bl_val[i] > -c_reward:
-                baseline_gap.append(-c_reward)
-            else:
-                baseline_gap.append(cost[i] - bl_val[i])
-        else:
-            if cost[i] - bl_val[i] < c_reward:
-                baseline_gap.append(c_reward)
-            else:
-                baseline_gap.append(cost[i] - bl_val[i])
-    baseline_gap = torch.Tensor(baseline_gap)
+    baseline_gap = cost - bl_val
+    baseline_gap = torch.clamp(baseline_gap, min=-c_reward, max=c_reward)
     reinforce_loss = (baseline_gap * log_likelihood).mean()
     # reinforce_loss = ((cost - bl_val) * log_likelihood).mean()
     loss = reinforce_loss + bl_loss
