@@ -386,7 +386,6 @@ def duibi_exhaustive_search(
         throughput_his.append(t_throughput)
         # print(t_decode_order,t_throughput)
         if t_throughput > min(t_ten_throughput):
-
             t_index = t_ten_throughput.index(min(t_ten_throughput))
             t_ten_throughput[t_index] = t_throughput
             t_ten_optimal_decode_order_list[t_index] = t_decode_order
@@ -491,7 +490,7 @@ def _get_sum_weighted_alpha_throughput(
         #         1 - alpha))
         user_throughput_list.append(
             tuser.w
-            * ((math.log2(1 + tuser.g * p[tindex] / (tnoise * 3)))) ** (1 - alpha)
+            * (math.log2(1 + tuser.g * p[tindex] / (tnoise * 3))) ** (1 - alpha)
             / (1 - alpha)
         )
         sum_weighted_alpha_throughput += user_throughput_list[-1]
@@ -560,6 +559,23 @@ def _get_optimal_p_nlopt(users=[], alpha=None, noise=args.noise, op_algorithm=-1
 
 # 获取在alpha=1时使得总加权alpha吞吐量最大化的功率分配 / Get power allocation that maximizes the sum weighted alpha throughput when alpha=1
 def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
+    """
+    Get power allocation that maximizes sum weighted alpha throughput when alpha=1.
+
+    Numerical stability safeguards:
+    - Clamps exponential inputs to prevent overflow (e^x limited to prevent float64 overflow)
+    - Uses floating-point arithmetic for power operations
+    - Validates intermediate values to prevent NaN/Inf propagation
+    - Checks gradient and Hessian terms for finiteness before accumulation
+
+    Args:
+        users: List of User objects
+        alpha: Fairness parameter
+        noise: Gaussian noise level
+
+    Returns:
+        List of optimal power allocations
+    """
     user_number = len(users)
     users_g = [(tuser.g, tuser.w) for i, tuser in enumerate(users)]
     # print('users_g',users_g)
@@ -589,10 +605,19 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
             df_np[0][txi] -= 1
             # 约束函数 / Constraints
             tsignal = tuser.g * e_x[tyi]
-            a = math.e ** (x[txi] / tuser.w)
+            # Numerical stability safeguards to prevent overflow in gradient/Hessian computation
+            # When x[txi]/w is large (>700), the chain of computations a=e^(x/w), b=2^a, c=b-1
+            # can overflow and produce NaN/Inf values that corrupt the optimization
+            x_ratio = x[txi] / tuser.w
+            a = math.e ** min(x_ratio, 700)  # Clamp to prevent e^x overflow
+            # Further clamp to prevent 2^a overflow in Hessian (2^100 ≈ 1.27e30, 2^200 ≈ 1.6e60 stays within float64)
+            if a > 100:
+                a = 100
             # print(f'a={a}')
-            b = 2**a
+            b = math.pow(2.0, a)  # Uses float arithmetic throughout
             c = b - 1
+            if c <= 0 or not math.isfinite(c):
+                c = b  # For large b, b-1 ≈ b
             # print(f"tsignal={tsignal},e_x[tyi]={e_x[tyi]},x[tyi]={x[tyi]},tuser.g={tuser.g}")
             # print(f'tnoise={tnoise},tsignal={tsignal},c={c}')
             f_np[ti] += math.log(tnoise / tsignal) + math.log(c)
@@ -618,11 +643,16 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
                         h_np[tyj][tyk] += (
                             z[ti] * e_x[tyj] * users[tyj + user_number].g / tnoise
                         )
-            df_np[ti][txi] += math.log(2) / tuser.w * a * b / c
+            # Compute gradient term separately to check for finiteness before adding to matrix
+            gradient_term = math.log(2) / tuser.w * a * b / c
+            if math.isfinite(gradient_term):
+                df_np[ti][txi] += gradient_term
             tnoise += tsignal
             if z is None:
                 continue
-            h_np[txi][txi] += (
+            # Compute Hessian term separately to check for finiteness before adding to matrix
+            # This term involves b^2 which can overflow even when b is finite
+            hessian_term = (
                 z[ti]
                 * math.log(2)
                 / tuser.w**2
@@ -631,6 +661,8 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
                 * (b - math.log(2) * a - 1)
                 / c**2
             )
+            if math.isfinite(hessian_term):
+                h_np[txi][txi] += hessian_term
 
             # print('online_tnoise',tnoise)
         f = matrix(f_np)
@@ -712,7 +744,7 @@ def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
 
         f_np = np.zeros([m + 1, 1])
         for i in range(user_num):
-            f_np[0] += -r[i] ** (1 - alpha)
+            f_np[0] += -(r[i] ** (1 - alpha))
             t_index = 1 + i
             f_np[t_index] = -tmp_f_log_2[i] + tmp_z_log_2[i] + u[i] * r[i]
             for j in range(i + 1, user_num):
