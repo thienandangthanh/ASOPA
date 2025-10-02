@@ -200,7 +200,8 @@ def run(opts):
             )
             # print('avg_reward',avg_reward,'max_reward',max_reward)
             if avg_reward > max_reward:
-                # max_reward = avg_reward
+                max_reward = avg_reward
+                print(f"New best model! Epoch {epoch}, Reward: {avg_reward:.4f}")
                 torch.save(
                     model, "Variable_user_n%d_epoch%d.pth" % (opts.graph_size, epoch)
                 )
