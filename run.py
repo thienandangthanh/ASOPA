@@ -206,6 +206,10 @@ def run(opts):
                 )
             cost_epoch = cost_epoch.tolist()
             cost_epoch_his.append(cost_epoch)
+
+        # Create performance_percent directory if it doesn't exist
+        os.makedirs("./performance_percent", exist_ok=True)
+
         sio.savemat(
             "./performance_percent/n%d_performance_value_%d.mat"
             % (opts.graph_size, opts.val_size),
