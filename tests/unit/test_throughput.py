@@ -10,7 +10,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def _seed():
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     seed_everything(1234)
 
 

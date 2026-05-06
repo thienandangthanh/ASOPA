@@ -10,7 +10,7 @@ from tqdm import tqdm
 import time
 from sic_ordering.problem_noop import noop_users, val_noop_users
 import torch
-from my_utils import *
+from utils.seeding import seed_everything
 from configurations import get_default_env_config
 
 # Use env defaults so show.py is self-contained (no CLI dependency).
@@ -88,7 +88,7 @@ def show_speed_performance_dataset(dataset):
 
     # 先把top15_list 从本地取出，若不存在则继续，会生成的
     try:
-        top15_list = sio.loadmat("Top15/n%d_top15_tabu" % (user_num))[
+        top15_list = sio.loadmat("input_data/dependencies/top15/n%d_top15_tabu" % (user_num))[
             "performance_list"
         ]
     except:
@@ -113,7 +113,7 @@ def show_speed_performance_dataset(dataset):
             # 穷搜存一下top15
             if method_name == "duibi_exhaustive_search":
                 try:
-                    top15_list = sio.loadmat("Top15/n%d_top15_tabu" % (user_num))[
+                    top15_list = sio.loadmat("input_data/dependencies/top15/n%d_top15_tabu" % (user_num))[
                         "performance_list"
                     ]
                 except:
@@ -145,7 +145,7 @@ def show_speed_performance_dataset(dataset):
                 time_end = time.time()
                 t_speed_list.append(time_end - time_start)
                 t_performance_list.append(t_throuhput)
-                # './Top15/n%d_top15_1.mat' % (user_num)
+                # './input_data/dependencies/top15/n%d_top15_1.mat' % (user_num)
 
                 if "duibi_exhaustive_search" in methods:
                     top15_i = copy.deepcopy(t_ten_throughput)
@@ -206,7 +206,7 @@ def show_speed_performance_dataset(dataset):
 
     if "duibi_exhaustive_search" in methods and not no_error:
         # 把本轮做好的top15样本存好，留到下一轮对比。因为固定了随机种子，所以没问题！
-        # file_name = './Top15/18_n%d_top15_1.csv'%(user_num)
+        # file_name = './input_data/dependencies/top15/18_n%d_top15_1.csv'%(user_num)
         # with open(file_name,'w',encoding='utf-8') as f:
         #     csv_writer = csv.writer(f)
         #     csv_writer.writerows(t_ten_performance_list)
@@ -214,7 +214,7 @@ def show_speed_performance_dataset(dataset):
         # print(t_ten_performance_list,t_ten_order_list)
         # 不能跑4个以下节点，因为不满15  3！=6 4！=24
         sio.savemat(
-            "./Top15/n%d_top15_tabu.mat" % (user_num),
+            "./input_data/dependencies/top15/n%d_top15_tabu.mat" % (user_num),
             {
                 "performance_list": t_ten_performance_list,
                 "order_list": t_ten_order_list,

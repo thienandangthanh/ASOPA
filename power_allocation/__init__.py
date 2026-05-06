@@ -38,6 +38,12 @@ from power_allocation.topology import (  # noqa: F401
     User,
     generate_topology,
     generate_val_topology,
+    set_users_g,
+    set_users_w,
+    get_usrs_g,
+    get_users_g_hat,
+    get_users_w_hat,
+    random_set_users_g,
 )
 
 __all__ = [
@@ -45,6 +51,12 @@ __all__ = [
     "User",
     "generate_topology",
     "generate_val_topology",
+    "set_users_g",
+    "set_users_w",
+    "get_usrs_g",
+    "get_users_g_hat",
+    "get_users_w_hat",
+    "random_set_users_g",
     # throughput
     "sort_by_decode_order",
     "get_max_sum_weighted_alpha_throughput",

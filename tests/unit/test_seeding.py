@@ -10,7 +10,7 @@ import torch
 
 
 def test_seed_everything_is_deterministic_for_numpy(fixed_seed):
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
 
     seed_everything(fixed_seed)
     a = np.random.rand(5)
@@ -20,7 +20,7 @@ def test_seed_everything_is_deterministic_for_numpy(fixed_seed):
 
 
 def test_seed_everything_is_deterministic_for_torch(fixed_seed):
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
 
     seed_everything(fixed_seed)
     a = torch.rand(5)

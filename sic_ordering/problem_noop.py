@@ -18,7 +18,8 @@ import numpy as np
 import torch
 
 from configurations import get_default_env_config
-from my_utils import seed_everything, get_users_g_hat, get_users_w_hat, set_users_g, set_users_w
+from utils.seeding import seed_everything
+from power_allocation.topology import get_users_g_hat, get_users_w_hat, set_users_g, set_users_w
 from power_allocation import (
     generate_topology,
     generate_val_topology,

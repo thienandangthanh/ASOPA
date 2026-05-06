@@ -13,7 +13,7 @@ from tensorboard_logger import Logger as TbLogger
 from attention_model.critic_network import CriticNetwork
 from configurations import get_options
 from train import train_epoch, validate, get_inner_model
-from reinforce_baselines import (
+from utils.reinforce_baselines import (
     NoBaseline,
     ExponentialBaseline,
     RolloutBaseline,
@@ -202,18 +202,38 @@ def run(opts):
             if avg_reward > max_reward:
                 max_reward = avg_reward
                 print(f"New best model! Epoch {epoch}, Reward: {avg_reward:.4f}")
+                # Save full pickle for backwards compat AND state_dict for the new pipeline.
+                ckpt_dir = "output/checkpoints"
+                os.makedirs(ckpt_dir, exist_ok=True)
                 torch.save(
-                    model, "Variable_user_n%d_epoch%d.pth" % (opts.graph_size, epoch)
+                    {
+                        "model_state_dict": get_inner_model(model).state_dict(),
+                        "model_init_args": {
+                            "embedding_dim": opts.embedding_dim,
+                            "hidden_dim": opts.hidden_dim,
+                            "n_heads": getattr(model, "n_heads", 8),
+                            "n_encode_layers": opts.n_encode_layers,
+                            "tanh_clipping": opts.tanh_clipping,
+                            "mask_inner": True,
+                            "mask_logits": True,
+                            "normalization": opts.normalization,
+                            "checkpoint_encoder": opts.checkpoint_encoder,
+                            "shrink_size": opts.shrink_size,
+                        },
+                        "epoch": epoch,
+                    },
+                    "%s/variable_user_n%d_epoch%d.pth"
+                    % (ckpt_dir, opts.user_num, epoch),
                 )
             cost_epoch = cost_epoch.tolist()
             cost_epoch_his.append(cost_epoch)
 
-        # Create performance_percent directory if it doesn't exist
-        os.makedirs("./performance_percent", exist_ok=True)
-
+        # Per-epoch validation history written under input_data/output/.
+        out_dir = "input_data/output"
+        os.makedirs(out_dir, exist_ok=True)
         sio.savemat(
-            "./performance_percent/n%d_performance_value_%d.mat"
-            % (opts.graph_size, opts.val_size),
+            "%s/n%d_performance_value_%d.mat"
+            % (out_dir, opts.user_num, opts.val_size),
             {"performance_percent": cost_epoch_his},
         )
 

@@ -21,7 +21,7 @@ def test_one_epoch_training_smoke():
 
     from attention_model.attention_model import AttentionModel
     from configurations import get_options
-    from reinforce_baselines import ExponentialBaseline
+    from utils.reinforce_baselines import ExponentialBaseline
     from train import train_epoch
     from utils import load_problem
 

@@ -54,7 +54,7 @@ def _array_hash(a: np.ndarray) -> str:
 
 def capture_topology() -> dict:
     """Snapshot generate_topology output for fixed seed + args."""
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     from power_allocation import generate_topology
 
     seed_everything(1234)
@@ -77,7 +77,7 @@ def capture_topology() -> dict:
 
 def capture_throughput() -> dict:
     """Snapshot get_max_sum_weighted_alpha_throughput on fixed users."""
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     from power_allocation import (
         generate_topology,
         get_max_sum_weighted_alpha_throughput,
@@ -100,7 +100,7 @@ def capture_throughput() -> dict:
 
 def capture_dataset() -> dict:
     """Snapshot dataset reproducibility (g/w tensor hashes)."""
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     from sic_ordering.dataset import (
         NOOP_allnum_Dataset,
         NOOPDataset,
@@ -142,7 +142,8 @@ def capture_dataset() -> dict:
 
 def capture_baselines() -> dict:
     """Snapshot duibi_* baseline orderings + utilities on a 5-user topology."""
-    from my_utils import seed_everything, set_users_g, set_users_w
+    from utils.seeding import seed_everything
+    from power_allocation.topology import set_users_g, set_users_w
     from power_allocation import (
         duibi_exhaustive_search,
         generate_topology,

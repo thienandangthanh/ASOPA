@@ -12,7 +12,7 @@ from tensorboard_logger import Logger as TbLogger
 from attention_model.critic_network import CriticNetwork
 from configurations import get_options
 from train import train_epoch, validate, get_inner_model
-from reinforce_baselines import (
+from utils.reinforce_baselines import (
     NoBaseline,
     ExponentialBaseline,
     RolloutBaseline,

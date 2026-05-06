@@ -17,7 +17,7 @@ def _load_golden(fixtures_dir: Path) -> dict:
 def _seed():
     """Re-seed before every test in this module (generate_topology pulls many
     RVs and downstream tests would corrupt each other otherwise)."""
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
 
     seed_everything(1234)
 
@@ -54,7 +54,7 @@ def test_generate_topology_matches_golden_attributes(fixtures_dir):
 
 def test_generate_topology_different_seed_changes_weights():
     """Sanity check: changing seed actually changes the random weight assignment."""
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     from power_allocation import generate_topology
 
     seed_everything(1)

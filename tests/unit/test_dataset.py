@@ -18,13 +18,13 @@ def _tensor_hash(t: torch.Tensor) -> str:
 
 @pytest.fixture(autouse=True)
 def _seed():
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     seed_everything(1234)
 
 
 def test_noop_dataset_is_reproducible(fixtures_dir):
     # Import first (may trigger module-level RNG consumption in problem_noop), then re-seed.
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     from sic_ordering.dataset import NOOPDataset
 
     golden = json.loads((fixtures_dir / "golden_dataset.json").read_text())["NOOPDataset"]
@@ -38,7 +38,7 @@ def test_noop_dataset_is_reproducible(fixtures_dir):
 
 
 def test_noop_val_dataset_is_reproducible(fixtures_dir):
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     from sic_ordering.dataset import NOOPValDataset
 
     golden = json.loads((fixtures_dir / "golden_dataset.json").read_text())["NOOPValDataset"]
@@ -51,7 +51,7 @@ def test_noop_val_dataset_is_reproducible(fixtures_dir):
 
 
 def test_noop_allnum_dataset_is_reproducible(fixtures_dir):
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     from sic_ordering.dataset import NOOP_allnum_Dataset
 
     golden = json.loads((fixtures_dir / "golden_dataset.json").read_text())["NOOP_allnum_Dataset"]

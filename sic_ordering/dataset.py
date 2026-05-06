@@ -24,7 +24,7 @@ import torch
 from torch.utils.data import Dataset
 
 from configurations import get_default_env_config
-from my_utils import get_users_g_hat
+from power_allocation.topology import get_users_g_hat
 from power_allocation import generate_topology
 from sic_ordering.problem_noop import noop_users, val_noop_users, w_to_1
 
@@ -93,7 +93,7 @@ class NOOPValDataset(Dataset):
         if seed:
             np.random.seed(seed)
 
-        mat = sio.loadmat("Val/n%d_valdataset.mat" % size)
+        mat = sio.loadmat("input_data/dependencies/val/n%d_valdataset.mat" % size)
         self.g = torch.FloatTensor(mat["val_g"])
         self.w = torch.FloatTensor(mat["val_w"])
 

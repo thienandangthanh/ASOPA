@@ -14,13 +14,14 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def _seed():
-    from my_utils import seed_everything
+    from utils.seeding import seed_everything
     seed_everything(1234)
 
 
 def _build_users():
     """Recreate the same fixed 5-user setup the capture script used."""
-    from my_utils import seed_everything, set_users_g, set_users_w
+    from utils.seeding import seed_everything
+    from power_allocation.topology import set_users_g, set_users_w
     from power_allocation import generate_topology
 
     seed_everything(1234)

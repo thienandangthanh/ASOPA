@@ -7,7 +7,7 @@ import torch
 
 
 def test_no_baseline_returns_zero():
-    from reinforce_baselines import NoBaseline
+    from utils.reinforce_baselines import NoBaseline
 
     bl = NoBaseline()
     v, loss = bl.eval(torch.zeros(3, 5), torch.tensor([1.0, 2.0, 3.0]))
@@ -16,7 +16,7 @@ def test_no_baseline_returns_zero():
 
 
 def test_exponential_baseline_initial_value_is_batch_mean():
-    from reinforce_baselines import ExponentialBaseline
+    from utils.reinforce_baselines import ExponentialBaseline
 
     bl = ExponentialBaseline(beta=0.8)
     cost = torch.tensor([1.0, 2.0, 3.0])
@@ -28,7 +28,7 @@ def test_exponential_baseline_initial_value_is_batch_mean():
 
 
 def test_exponential_baseline_decays_with_beta():
-    from reinforce_baselines import ExponentialBaseline
+    from utils.reinforce_baselines import ExponentialBaseline
 
     bl = ExponentialBaseline(beta=0.8)
     bl.eval(torch.zeros(3, 5), torch.tensor([1.0, 2.0, 3.0]))  # initial v = 2.0
@@ -39,7 +39,7 @@ def test_exponential_baseline_decays_with_beta():
 
 
 def test_exponential_baseline_state_dict_round_trip():
-    from reinforce_baselines import ExponentialBaseline
+    from utils.reinforce_baselines import ExponentialBaseline
 
     bl = ExponentialBaseline(beta=0.8)
     bl.eval(torch.zeros(3, 5), torch.tensor([1.0, 2.0, 3.0]))
