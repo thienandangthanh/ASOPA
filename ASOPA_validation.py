@@ -10,12 +10,11 @@ import torch.optim as optim
 import numpy as np
 
 from nets.critic_network import CriticNetwork
-from options import get_options
+from configurations import get_options
 from train import train_epoch, validate, get_inner_model
 from nets.attention_model import AttentionModel
 from nets.pointer_network import PointerNetwork, CriticNetworkLSTM
 from utils import torch_load_cpu, load_problem
-from conf import args
 
 
 def run(opts):
@@ -32,14 +31,27 @@ def run(opts):
     # Figure out what's the problem
     problem = load_problem(opts.problem)
 
-    validate_epoch = args.val_epoch
-    # Load model with weights_only=False for compatibility with older PyTorch model files
-    # This is safe since we trust the source of this checkpoint
-    model = torch.load(
-        "Variable_user_n10_epoch{}.pth".format(validate_epoch), weights_only=False
+    validate_epoch = opts.val_epoch
+    # Build a fresh AttentionModel and load the converted state_dict checkpoint.
+    payload = torch.load(
+        "output/checkpoints/variable_user_n10_epoch{}.pth".format(validate_epoch),
+        weights_only=False,
+        map_location=opts.device,
     )
-    # Move model to the correct device
-    model = model.to(opts.device)
+    init_args = payload["model_init_args"]
+    model = AttentionModel(
+        init_args["embedding_dim"],
+        init_args["hidden_dim"],
+        problem,
+        n_encode_layers=init_args["n_encode_layers"],
+        mask_inner=init_args["mask_inner"],
+        mask_logits=init_args["mask_logits"],
+        normalization=init_args.get("normalization", "batch"),
+        tanh_clipping=init_args["tanh_clipping"],
+        checkpoint_encoder=init_args.get("checkpoint_encoder", False),
+        shrink_size=init_args.get("shrink_size", None),
+    ).to(opts.device)
+    model.load_state_dict(payload["model_state_dict"])
     val_dataset = problem.load_val_dataset(
         size=opts.graph_size,
         num_samples=opts.val_size,

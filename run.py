@@ -11,7 +11,7 @@ import torch.optim as optim
 from tensorboard_logger import Logger as TbLogger
 
 from nets.critic_network import CriticNetwork
-from options import get_options
+from configurations import get_options
 from train import train_epoch, validate, get_inner_model
 from reinforce_baselines import (
     NoBaseline,

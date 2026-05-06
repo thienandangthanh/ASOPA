@@ -20,7 +20,7 @@ def test_one_epoch_training_smoke():
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
     from nets.attention_model import AttentionModel
-    from options import get_options
+    from configurations import get_options
     from reinforce_baselines import ExponentialBaseline
     from train import train_epoch
     from utils import load_problem

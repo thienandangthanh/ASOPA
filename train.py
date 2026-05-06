@@ -12,7 +12,6 @@ from nets.attention_model import set_decode_type
 from utils.log_utils import log_values
 from utils import move_to
 
-from conf import args
 import csv
 import scipy.io as sio
 
@@ -207,7 +206,7 @@ def train_epoch(
     t_cost = t2 - t1
     # print('Validation duration',t_cost)
     jilu_val_cost(
-        epoch, -avg_reward.item(), t_cost, "%d_n_allnum.csv" % (args.val_user_num)
+        epoch, -avg_reward.item(), t_cost, "%d_n_allnum.csv" % (opts.val_user_num)
     )
 
     # if not opts.no_tensorboard:
@@ -261,7 +260,7 @@ def train_batch(
     training_cost = training_end - training_start
 
     # print('training_cost',training_cost)
-    # path_ = "%d_n_training_cost.csv"%(args.val_user_num)
+    # path_ = "%d_n_training_cost.csv"%(opts.val_user_num)
     # with open(path_, 'a+') as f:
     #     csv_write = csv.writer(f)
     #     data_row = [epoch, training_cost]

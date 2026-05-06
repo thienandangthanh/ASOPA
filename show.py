@@ -11,6 +11,10 @@ import time
 from problems.noop.problem_noop import noop_users, val_noop_users
 import torch
 from my_utils import *
+from configurations import get_default_env_config
+
+# Use env defaults so show.py is self-contained (no CLI dependency).
+args = get_default_env_config()
 
 
 def show_order_influence():

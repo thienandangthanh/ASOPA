@@ -9,17 +9,21 @@ from problems.noop.state_noop import StateNOOP
 from utils.beam_search import beam_search
 from my_utils import *
 from resource_allocation_optimization import *
-from conf import args
+from configurations import get_default_env_config
 from tqdm import tqdm
 import scipy.io as sio
 
-seed_everything(args.seed)
+# Module-level env defaults — used to populate baseline topology + dataset
+# behavior when callers don't pass explicit overrides.
+_env = get_default_env_config()
+
+seed_everything(_env.seed)
 noop_users = generate_topology(
-    args.user_num, args.d_min, args.d_max, args.w_min, args.w_max
+    _env.user_num, _env.d_min, _env.d_max, _env.w_min, _env.w_max
 )
-if args.user_num != args.val_user_num:  # 验证集不再补0
+if _env.user_num != _env.val_user_num:
     val_noop_users = generate_val_topology(
-        args.val_user_num, args.d_min, args.d_max, args.w_min, args.w_max
+        _env.val_user_num, _env.d_min, _env.d_max, _env.w_min, _env.w_max
     )
 users_g_hat = get_users_g_hat(noop_users)
 user_w_hat = get_users_w_hat(noop_users)
@@ -130,7 +134,7 @@ class NOOPDataset(Dataset):
         distribution=None,
     ):
         print("size", size)
-        if size != args.user_num:
+        if size != _env.user_num:
             users = val_noop_users
         else:
             users = noop_users
@@ -142,7 +146,7 @@ class NOOPDataset(Dataset):
         ng = (
             g
             + np.random.normal(loc=0, scale=1, size=[num_samples, len(users)])
-            * args.noise
+            * _env.noise
         )
         # 把权重也随机喂入
         values_w = [1, 2, 4, 8, 16, 32]
@@ -177,7 +181,7 @@ class NOOPValDataset(Dataset):
         distribution=None,
     ):
         print("size", size)
-        if size != args.user_num:
+        if size != _env.user_num:
             users = val_noop_users
         else:
             users = noop_users
@@ -224,8 +228,8 @@ class NOOP_allnum_Dataset(Dataset):
         w_list = []
         self.data_num = num_samples
 
-        num_list = [i for i in range(args.num_min, args.num_max + 1)]  # 5-10
-        # num_list = [i for i in range(args.num_min,args.num_max+2,2)]  # 10-20
+        num_list = [i for i in range(_env.num_min, _env.num_max + 1)]  # 5-10
+        # num_list = [i for i in range(_env.num_min, _env.num_max + 2, 2)]  # 10-20
 
         values_w = [1, 2, 4, 8, 16, 32]
         list_num_random = [213, 213, 213, 213, 214, 214]
@@ -233,7 +237,7 @@ class NOOP_allnum_Dataset(Dataset):
         for user_num in num_list:
             # print('users_num:',user_num)
             tusers_list = generate_topology(
-                user_num, args.d_min, args.d_max, args.w_min, args.w_max, args.num_max
+                user_num, _env.d_min, _env.d_max, _env.w_min, _env.w_max, _env.num_max
             )  # 5 6 7 8 9 10的 [Usr1,2,3,4,5]
             users_list.append(tusers_list)
             # print('users_list',len(users_list))

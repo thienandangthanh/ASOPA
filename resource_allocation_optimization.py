@@ -12,7 +12,12 @@ from itertools import permutations
 # import nlopt
 # import tianshou
 import keyword
-from conf import args
+from configurations import get_default_env_config
+
+# Module-level defaults — pulled once at import time. Functions in this file
+# accept overrides via keyword args; callers can also pass an explicit `opts`
+# Namespace from `configurations.get_options()`.
+_env = get_default_env_config()
 
 # __all__=()
 solvers.options["show_progress"] = False
@@ -33,11 +38,11 @@ class User:
 # 生成拓扑，返回一个用户的list
 # Generate topology; return a list of users
 def generate_topology(
-    user_number=args.user_num,
-    d_min=args.d_min,
-    d_max=args.d_max,
-    w_min=args.w_min,
-    w_max=args.w_max,
+    user_number=_env.user_num,
+    d_min=_env.d_min,
+    d_max=_env.d_max,
+    w_min=_env.w_min,
+    w_max=_env.w_max,
     max_num=10,
 ):
     # 暂时假设用户在[d_min,d_max]间均匀分布 / Temporarily assume users are uniformly distributed in [d_min, d_max]
@@ -100,11 +105,11 @@ def generate_topology(
 # 生成拓扑，返回一个用户的list
 # Generate topology; return a list of users
 def generate_val_topology(
-    user_number=args.user_num,
-    d_min=args.d_min,
-    d_max=args.d_max,
-    w_min=args.w_min,
-    w_max=args.w_max,
+    user_number=_env.user_num,
+    d_min=_env.d_min,
+    d_max=_env.d_max,
+    w_min=_env.w_min,
+    w_max=_env.w_max,
     max_num=10,
 ):
     # 暂时假设用户在[d_min,d_max]间均匀分布 / Temporarily assume users are uniformly distributed in [d_min, d_max]
@@ -175,7 +180,7 @@ def sort_by_decode_order(users=[], decode_order=None, need_order=False):
 
 # 所有对比方法都返回其对应的解码顺序，与在这个解码顺序下的最大的总加权alpha吞吐量 / All baselines return their decoding order and the maximum sum weighted alpha throughput under that order
 # 对比方案，按照g的升序 / Baseline: sort by g ascending
-def duibi_g_order_asc(users=[], alpha=None, noise=args.noise):
+def duibi_g_order_asc(users=[], alpha=None, noise=_env.noise):
     a = [(i, tuser.g) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: ta[1])
     decode_order = [i for i, _ in a]
@@ -187,7 +192,7 @@ def duibi_g_order_asc(users=[], alpha=None, noise=args.noise):
 
 
 # 对比方案，按照g的降序 / Baseline: sort by g descending
-def duibi_g_order_desc(users=[], alpha=None, noise=args.noise):
+def duibi_g_order_desc(users=[], alpha=None, noise=_env.noise):
     a = [(i, tuser.g) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: -ta[1])
     decode_order = [i for i, _ in a]
@@ -200,7 +205,7 @@ def duibi_g_order_desc(users=[], alpha=None, noise=args.noise):
 
 
 # 对比方案，按照用户权重w的降序 / Baseline: sort by user weight w descending
-def duibi_w_order_desc(users=[], alpha=None, noise=args.noise):
+def duibi_w_order_desc(users=[], alpha=None, noise=_env.noise):
     a = [(i, tuser.w) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: -ta[1])
     decode_order = [i for i, _ in a]
@@ -213,7 +218,7 @@ def duibi_w_order_desc(users=[], alpha=None, noise=args.noise):
 
 
 # 对比方案，按照用户权重w的升序 / Baseline: sort by user weight w ascending
-def duibi_w_order_aesc(users=[], alpha=None, noise=args.noise):
+def duibi_w_order_aesc(users=[], alpha=None, noise=_env.noise):
     a = [(i, tuser.w) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: ta[1])
     decode_order = [i for i, _ in a]
@@ -227,7 +232,7 @@ def duibi_w_order_aesc(users=[], alpha=None, noise=args.noise):
 
 # 对比方案，qian的启发式方法（不断找到个最好的位置插入）（默认按照给定的用户顺序进行插入） / Baseline: Qian's heuristic (iteratively insert at the best position) (default insertion follows the given user order)
 def duibi_heuristic_method_qian(
-    users=[], alpha=None, noise=args.noise, need_random=False
+    users=[], alpha=None, noise=_env.noise, need_random=False
 ):
     # print('用户状态 / User state', users)
     if need_random:
@@ -259,7 +264,7 @@ def duibi_heuristic_method_qian(
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-def duibi_tabu_search_gd(users=[], alpha=None, noise=args.noise, need_random=False):
+def duibi_tabu_search_gd(users=[], alpha=None, noise=_env.noise, need_random=False):
     # gd初始 / g-desc initialization
     a = [(i, tuser.g) for i, tuser in enumerate(users)]
     a = sorted(a, key=lambda ta: -ta[1])
@@ -310,7 +315,7 @@ def duibi_tabu_search_gd(users=[], alpha=None, noise=args.noise, need_random=Fal
     return decode_order, max_sum_weighted_alpha_throughput
 
 
-def duibi_tabu_search_wd(users=[], alpha=None, noise=args.noise, need_random=False):
+def duibi_tabu_search_wd(users=[], alpha=None, noise=_env.noise, need_random=False):
     # gd初始 / g-desc initialization
     # a = [(i, tuser.g) for i, tuser in enumerate(users)]
     # a = sorted(a, key=lambda ta: -ta[1])
@@ -362,13 +367,13 @@ def duibi_tabu_search_wd(users=[], alpha=None, noise=args.noise, need_random=Fal
 
 
 # 对比方法，qian的启发式方法（不断找到个最好的位置插入）（先打乱用户，然后按照打乱之后的用户顺序进行插入） / Baseline: Qian's heuristic (insert at the best position; shuffle users first, then insert in that order)
-def duibi_heuristic_method_qian_random(users=[], alpha=None, noise=args.noise):
+def duibi_heuristic_method_qian_random(users=[], alpha=None, noise=_env.noise):
     return duibi_heuristic_method_qian(users, alpha, noise, need_random=True)
 
 
 # 对比方案，穷搜 / Baseline: exhaustive search
 def duibi_exhaustive_search(
-    users=[], alpha=None, noise=args.noise, need_throughput_his=False
+    users=[], alpha=None, noise=_env.noise, need_throughput_his=False
 ):
     t_optimal_decode_order = []
     # top15
@@ -403,7 +408,7 @@ def duibi_exhaustive_search(
     )
 
 
-# def duibi_exhaustive_search(users=[], alpha=None, noise=args.noise, need_throughput_his=False):
+# def duibi_exhaustive_search(users=[], alpha=None, noise=_env.noise, need_throughput_his=False):
 #     t_optimal_decode_order = []
 #     t_max_throughput = -float('inf')
 #     user_number = len(users)
@@ -421,7 +426,7 @@ def duibi_exhaustive_search(
 #     return t_optimal_decode_order, t_max_throughput
 
 
-def duibi_random(users=[], alpha=None, noise=args.noise, need_throughput_his=False):
+def duibi_random(users=[], alpha=None, noise=_env.noise, need_throughput_his=False):
     users_order, decode_order = sort_by_decode_order(users=users, need_order=True)
     max_sum_weighted_alpha_throughput = get_max_sum_weighted_alpha_throughput(
         users=users_order, alpha=alpha, noise=noise
@@ -431,7 +436,7 @@ def duibi_random(users=[], alpha=None, noise=args.noise, need_throughput_his=Fal
 
 # 计算目标吞吐量 / Compute objective throughput
 def get_objective_throughput(
-    users=[], p=None, alpha=None, noise=args.noise, need_user_throughput_list=False
+    users=[], p=None, alpha=None, noise=_env.noise, need_user_throughput_list=False
 ):
     if p is None or alpha is None:
         return 0
@@ -455,7 +460,7 @@ def get_objective_throughput(
 
 # 计算当alpha=1时的目标吞吐量 / Compute objective throughput when alpha=1
 def _get_sum_weighted_ln_throughput(
-    users=[], p=None, noise=args.noise, need_user_throughput_list=False
+    users=[], p=None, noise=_env.noise, need_user_throughput_list=False
 ):
     tnoise = noise
     sum_weighted_ln_throughput = 0
@@ -479,7 +484,7 @@ def _get_sum_weighted_ln_throughput(
 
 # 计算当alpha≠1时的目标吞吐量 / Compute objective throughput when alpha≠1
 def _get_sum_weighted_alpha_throughput(
-    users=[], p=None, alpha=None, noise=args.noise, need_user_throughput_list=False
+    users=[], p=None, alpha=None, noise=_env.noise, need_user_throughput_list=False
 ):
     tnoise = noise
     sum_weighted_alpha_throughput = 0
@@ -502,7 +507,7 @@ def _get_sum_weighted_alpha_throughput(
 
 # 获取最大的总加权alpha吞吐量 / Get the maximum sum weighted alpha throughput
 def get_max_sum_weighted_alpha_throughput(
-    users=[], alpha=args.alpha, noise=args.noise, use_nlopt=False
+    users=[], alpha=_env.alpha, noise=_env.noise, use_nlopt=False
 ):
     users_real = []
     for tuser in users:
@@ -519,7 +524,7 @@ def get_max_sum_weighted_alpha_throughput(
 
 
 # 获取使得总加权alpha吞吐量最大化的功率分配 / Get the power allocation that maximizes the sum weighted alpha throughput
-def get_optimal_p(users=[], alpha=None, noise=args.noise, use_nlopt=False):
+def get_optimal_p(users=[], alpha=None, noise=_env.noise, use_nlopt=False):
     # print(f'alpha={alpha}')
     assert alpha >= 0
     if use_nlopt:
@@ -531,11 +536,11 @@ def get_optimal_p(users=[], alpha=None, noise=args.noise, use_nlopt=False):
     return _get_optimal_p_alpha_0_1(users=users, alpha=alpha, noise=noise)
 
 
-def _get_optimal_p_nlopt(users=[], alpha=None, noise=args.noise, op_algorithm=-1):
+def _get_optimal_p_nlopt(users=[], alpha=None, noise=_env.noise, op_algorithm=-1):
     return None
 
 
-# def _get_optimal_p_nlopt(users=[],alpha=None,noise=args.noise,op_algorithm=nlopt.GN_DIRECT_L):
+# def _get_optimal_p_nlopt(users=[],alpha=None,noise=_env.noise,op_algorithm=nlopt.GN_DIRECT_L):
 #     # 计算目标函数的值与梯度 / Compute objective and gradient
 #     def my_func(x,grad):
 #         user_throughput_list=get_objective_throughput(users,x,alpha,noise)
@@ -558,7 +563,7 @@ def _get_optimal_p_nlopt(users=[], alpha=None, noise=args.noise, op_algorithm=-1
 
 
 # 获取在alpha=1时使得总加权alpha吞吐量最大化的功率分配 / Get power allocation that maximizes the sum weighted alpha throughput when alpha=1
-def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
+def _get_optimal_p_alpha_1(users=[], alpha=None, noise=_env.noise):
     """
     Get power allocation that maximizes sum weighted alpha throughput when alpha=1.
 
@@ -703,12 +708,12 @@ def _get_optimal_p_alpha_1(users=[], alpha=None, noise=args.noise):
 
 
 # 获取在alpha>1时使得总加权alpha吞吐量最大化的功率分配 / Get power allocation that maximizes the sum weighted alpha throughput for alpha>1
-def _get_optimal_p_alpha_1_infinity(users=[], alpha=None, noise=args.noise):
+def _get_optimal_p_alpha_1_infinity(users=[], alpha=None, noise=_env.noise):
     return [0] * len(users)
 
 
 # 获取在alpha∈[0,1)时使得总加权alpha吞吐量最大化的功率分配，使用SCA来解决 / Get power allocation that maximizes the sum weighted alpha throughput for alpha∈[0,1); solved via SCA
-def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
+def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=_env.noise):
     user_num = len(users)
     u = [((1 - alpha) / tuser.w) ** (1 / (1 - alpha)) for tuser in users]
     # cvxopt需要用到的东西 / Ingredients required by cvxopt
@@ -806,7 +811,7 @@ def _get_optimal_p_alpha_0_1(users=[], alpha=None, noise=args.noise):
 
 # 从给定的多个排序策略中选出最优的一个排序策略 / Select the best ranking policy among the given candidates
 def get_optimal_ranking_policy(
-    users=[], ranking_policies=[[]], alpha=None, noise=args.noise
+    users=[], ranking_policies=[[]], alpha=None, noise=_env.noise
 ):
     t_optimal_ranking_policy = []
     t_max_throughput = -float("inf")

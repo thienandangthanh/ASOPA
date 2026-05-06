@@ -206,7 +206,7 @@ def capture_baselines() -> dict:
 def capture_validation_n8(state_dict_path: Path) -> dict:
     """Run the full ASOPA_validation flow on n=8 against epoch-480 state_dict checkpoint, CPU."""
     from nets.attention_model import AttentionModel
-    from options import get_options
+    from configurations import get_options
     from train import validate
     from utils import load_problem
 

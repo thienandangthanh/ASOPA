@@ -28,7 +28,7 @@ def test_full_validation_n8_matches_golden(fixtures_dir):
         pytest.skip(golden.get("reason", "validation golden skipped"))
 
     from nets.attention_model import AttentionModel
-    from options import get_options
+    from configurations import get_options
     from train import validate
     from utils import load_problem
 
