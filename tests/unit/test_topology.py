@@ -24,7 +24,7 @@ def _seed():
 
 def test_generate_topology_user_count_includes_padding(fixtures_dir):
     """generate_topology returns user_number real users + padding to max_num."""
-    from resource_allocation_optimization import generate_topology
+    from power_allocation import generate_topology
 
     users = generate_topology(5, 20, 100, 1, 32)
     assert len(users) == 10, "default max_num=10; 5 real + 5 padded"
@@ -36,7 +36,7 @@ def test_generate_topology_user_count_includes_padding(fixtures_dir):
 
 
 def test_generate_topology_matches_golden_attributes(fixtures_dir):
-    from resource_allocation_optimization import generate_topology
+    from power_allocation import generate_topology
 
     users = generate_topology(10, 20, 100, 1, 32)
     golden = _load_golden(fixtures_dir)
@@ -55,7 +55,7 @@ def test_generate_topology_matches_golden_attributes(fixtures_dir):
 def test_generate_topology_different_seed_changes_weights():
     """Sanity check: changing seed actually changes the random weight assignment."""
     from my_utils import seed_everything
-    from resource_allocation_optimization import generate_topology
+    from power_allocation import generate_topology
 
     seed_everything(1)
     users_a = generate_topology(10, 20, 100, 1, 32)

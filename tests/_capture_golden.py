@@ -55,7 +55,7 @@ def _array_hash(a: np.ndarray) -> str:
 def capture_topology() -> dict:
     """Snapshot generate_topology output for fixed seed + args."""
     from my_utils import seed_everything
-    from resource_allocation_optimization import generate_topology
+    from power_allocation import generate_topology
 
     seed_everything(1234)
     users = generate_topology(10, 20, 100, 1, 32)
@@ -78,7 +78,7 @@ def capture_topology() -> dict:
 def capture_throughput() -> dict:
     """Snapshot get_max_sum_weighted_alpha_throughput on fixed users."""
     from my_utils import seed_everything
-    from resource_allocation_optimization import (
+    from power_allocation import (
         generate_topology,
         get_max_sum_weighted_alpha_throughput,
         sort_by_decode_order,
@@ -101,7 +101,7 @@ def capture_throughput() -> dict:
 def capture_dataset() -> dict:
     """Snapshot dataset reproducibility (g/w tensor hashes)."""
     from my_utils import seed_everything
-    from problems.noop.problem_noop import (
+    from sic_ordering.dataset import (
         NOOP_allnum_Dataset,
         NOOPDataset,
         NOOPValDataset,
@@ -143,7 +143,7 @@ def capture_dataset() -> dict:
 def capture_baselines() -> dict:
     """Snapshot duibi_* baseline orderings + utilities on a 5-user topology."""
     from my_utils import seed_everything, set_users_g, set_users_w
-    from resource_allocation_optimization import (
+    from power_allocation import (
         duibi_exhaustive_search,
         generate_topology,
         get_max_sum_weighted_alpha_throughput,
@@ -205,7 +205,7 @@ def capture_baselines() -> dict:
 
 def capture_validation_n8(state_dict_path: Path) -> dict:
     """Run the full ASOPA_validation flow on n=8 against epoch-480 state_dict checkpoint, CPU."""
-    from nets.attention_model import AttentionModel
+    from attention_model.attention_model import AttentionModel
     from configurations import get_options
     from train import validate
     from utils import load_problem

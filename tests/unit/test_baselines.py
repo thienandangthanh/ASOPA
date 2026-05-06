@@ -21,7 +21,7 @@ def _seed():
 def _build_users():
     """Recreate the same fixed 5-user setup the capture script used."""
     from my_utils import seed_everything, set_users_g, set_users_w
-    from resource_allocation_optimization import generate_topology
+    from power_allocation import generate_topology
 
     seed_everything(1234)
     users = generate_topology(5, 20, 100, 1, 32)
@@ -34,7 +34,7 @@ def _build_users():
 
 
 def test_g_descending_ordering_matches_golden(fixtures_dir):
-    from resource_allocation_optimization import (
+    from power_allocation import (
         get_max_sum_weighted_alpha_throughput,
         sort_by_decode_order,
     )
@@ -54,7 +54,7 @@ def test_g_descending_ordering_matches_golden(fixtures_dir):
 
 
 def test_w_descending_ordering_matches_golden(fixtures_dir):
-    from resource_allocation_optimization import (
+    from power_allocation import (
         get_max_sum_weighted_alpha_throughput,
         sort_by_decode_order,
     )
@@ -76,7 +76,7 @@ def test_w_descending_ordering_matches_golden(fixtures_dir):
 @pytest.mark.slow
 def test_exhaustive_search_finds_optimum(fixtures_dir):
     """120 perms — slow-marked because it's heavier than other unit tests."""
-    from resource_allocation_optimization import duibi_exhaustive_search
+    from power_allocation import duibi_exhaustive_search
 
     golden = json.loads((fixtures_dir / "golden_baselines.json").read_text())["exhaustive"]
     real = _build_users()

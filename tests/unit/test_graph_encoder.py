@@ -8,7 +8,7 @@ import torch
 
 
 def test_multi_head_attention_preserves_shape(fixed_seed):
-    from nets.graph_encoder import MultiHeadAttention
+    from attention_model.graph_encoder import MultiHeadAttention
 
     n_heads, dim = 8, 128
     mha = MultiHeadAttention(n_heads, input_dim=dim, embed_dim=dim)
@@ -19,7 +19,7 @@ def test_multi_head_attention_preserves_shape(fixed_seed):
 
 
 def test_skip_connection_adds_residual(fixed_seed):
-    from nets.graph_encoder import SkipConnection
+    from attention_model.graph_encoder import SkipConnection
     from torch import nn
 
     inner = nn.Linear(4, 4)
@@ -32,7 +32,7 @@ def test_skip_connection_adds_residual(fixed_seed):
 
 
 def test_graph_attention_encoder_returns_node_and_graph_embeddings(fixed_seed):
-    from nets.graph_encoder import GraphAttentionEncoder
+    from attention_model.graph_encoder import GraphAttentionEncoder
 
     enc = GraphAttentionEncoder(n_heads=8, embed_dim=128, n_layers=2, normalization="batch")
     x = torch.randn(2, 6, 128)

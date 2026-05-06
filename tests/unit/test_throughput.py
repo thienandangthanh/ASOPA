@@ -15,7 +15,7 @@ def _seed():
 
 
 def test_get_max_sum_weighted_alpha_throughput_matches_golden(fixtures_dir):
-    from resource_allocation_optimization import (
+    from power_allocation import (
         generate_topology,
         get_max_sum_weighted_alpha_throughput,
         sort_by_decode_order,

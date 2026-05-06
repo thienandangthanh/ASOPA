@@ -9,11 +9,11 @@ import torch.optim as optim
 
 import numpy as np
 
-from nets.critic_network import CriticNetwork
+from attention_model.critic_network import CriticNetwork
 from configurations import get_options
 from train import train_epoch, validate, get_inner_model
-from nets.attention_model import AttentionModel
-from nets.pointer_network import PointerNetwork, CriticNetworkLSTM
+from attention_model.attention_model import AttentionModel
+from attention_model.pointer_network import PointerNetwork, CriticNetworkLSTM
 from utils import torch_load_cpu, load_problem
 
 

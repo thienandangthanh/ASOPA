@@ -11,7 +11,7 @@ import torch.nn.functional as F
 
 
 def load_problem(name):
-    from problems import NOOP
+    from sic_ordering import NOOP
 
     # print("6666")
     problem = {
@@ -74,8 +74,8 @@ def load_args(filename):
 
 
 def load_model(path, epoch=None):
-    from nets.attention_model import AttentionModel
-    from nets.pointer_network import PointerNetwork
+    from attention_model.attention_model import AttentionModel
+    from attention_model.pointer_network import PointerNetwork
 
     if os.path.isfile(path):
         model_filename = path

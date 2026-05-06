@@ -7,7 +7,7 @@ import torch
 
 
 def test_state_noop_initialize_creates_empty_visited():
-    from problems.noop.state_noop import StateNOOP
+    from sic_ordering.state_noop import StateNOOP
 
     g = torch.randn(2, 5, 3)
     state = StateNOOP.initialize(g)
@@ -19,7 +19,7 @@ def test_state_noop_initialize_creates_empty_visited():
 
 
 def test_state_noop_update_marks_selected_as_visited():
-    from problems.noop.state_noop import StateNOOP
+    from sic_ordering.state_noop import StateNOOP
 
     g = torch.randn(2, 5, 3)
     state = StateNOOP.initialize(g)
@@ -35,7 +35,7 @@ def test_state_noop_update_marks_selected_as_visited():
 
 
 def test_state_noop_get_mask_reflects_visited():
-    from problems.noop.state_noop import StateNOOP
+    from sic_ordering.state_noop import StateNOOP
 
     g = torch.randn(1, 4, 3)
     state = StateNOOP.initialize(g)
@@ -49,7 +49,7 @@ def test_state_noop_get_mask_reflects_visited():
 
 
 def test_state_noop_all_finished_after_n_steps():
-    from problems.noop.state_noop import StateNOOP
+    from sic_ordering.state_noop import StateNOOP
 
     g = torch.randn(1, 3, 3)
     state = StateNOOP.initialize(g)

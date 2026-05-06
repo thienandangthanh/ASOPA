@@ -2,13 +2,13 @@ import copy
 import csv
 import scipy.io as sio
 
-from resource_allocation_optimization import *
+from power_allocation import *
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from tqdm import tqdm
 import time
-from problems.noop.problem_noop import noop_users, val_noop_users
+from sic_ordering.problem_noop import noop_users, val_noop_users
 import torch
 from my_utils import *
 from configurations import get_default_env_config

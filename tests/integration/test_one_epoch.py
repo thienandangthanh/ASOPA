@@ -19,7 +19,7 @@ import torch
 def test_one_epoch_training_smoke():
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
-    from nets.attention_model import AttentionModel
+    from attention_model.attention_model import AttentionModel
     from configurations import get_options
     from reinforce_baselines import ExponentialBaseline
     from train import train_epoch

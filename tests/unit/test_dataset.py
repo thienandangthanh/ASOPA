@@ -25,7 +25,7 @@ def _seed():
 def test_noop_dataset_is_reproducible(fixtures_dir):
     # Import first (may trigger module-level RNG consumption in problem_noop), then re-seed.
     from my_utils import seed_everything
-    from problems.noop.problem_noop import NOOPDataset
+    from sic_ordering.dataset import NOOPDataset
 
     golden = json.loads((fixtures_dir / "golden_dataset.json").read_text())["NOOPDataset"]
     seed_everything(1234)
@@ -39,7 +39,7 @@ def test_noop_dataset_is_reproducible(fixtures_dir):
 
 def test_noop_val_dataset_is_reproducible(fixtures_dir):
     from my_utils import seed_everything
-    from problems.noop.problem_noop import NOOPValDataset
+    from sic_ordering.dataset import NOOPValDataset
 
     golden = json.loads((fixtures_dir / "golden_dataset.json").read_text())["NOOPValDataset"]
     seed_everything(1234)
@@ -52,7 +52,7 @@ def test_noop_val_dataset_is_reproducible(fixtures_dir):
 
 def test_noop_allnum_dataset_is_reproducible(fixtures_dir):
     from my_utils import seed_everything
-    from problems.noop.problem_noop import NOOP_allnum_Dataset
+    from sic_ordering.dataset import NOOP_allnum_Dataset
 
     golden = json.loads((fixtures_dir / "golden_dataset.json").read_text())["NOOP_allnum_Dataset"]
     seed_everything(1234)

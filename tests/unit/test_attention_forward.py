@@ -26,7 +26,7 @@ def loaded_model():
     if not CKPT_PATH.exists():
         pytest.skip(f"checkpoint missing: {CKPT_PATH}")
 
-    from nets.attention_model import AttentionModel, set_decode_type
+    from attention_model.attention_model import AttentionModel, set_decode_type
     from utils import load_problem
 
     payload = torch.load(str(CKPT_PATH), weights_only=False, map_location="cpu")
@@ -53,7 +53,7 @@ def loaded_model():
 
 def test_state_dict_load_matches_validation_golden(loaded_model, fixtures_dir):
     """End-to-end: state_dict checkpoint reproduces avg_cost from golden_n8_validation."""
-    from problems.noop.problem_noop import NOOP
+    from sic_ordering.problem_noop import NOOP
 
     golden = json.loads((fixtures_dir / "golden_n8_validation.json").read_text())
     if golden.get("skipped"):
@@ -76,7 +76,7 @@ def test_state_dict_load_matches_validation_golden(loaded_model, fixtures_dir):
 
 def test_attention_forward_returns_cost_and_log_likelihood(loaded_model):
     """Smoke check on shape contract — model(input) returns (cost, log_likelihood)."""
-    from problems.noop.problem_noop import NOOP
+    from sic_ordering.problem_noop import NOOP
 
     val_dataset = NOOP.load_val_dataset(size=8, num_samples=4)
     from torch.utils.data import DataLoader
