@@ -1,281 +1,185 @@
+#!/usr/bin/env python
+"""Top-level training entry point.
+
+The actual training and validation logic lives in
+`attention_model.training_loop`. This script just parses options, wires
+the model + baseline + optimizer, and runs `train_epoch` in a loop.
+
+Usage:
+    uv run python train.py --user_num 10 --n_epochs 1 --no_cuda
+    uv run python train.py --eval_only --load_path output/checkpoints/...
+"""
+
+from __future__ import annotations
+
+import json
 import os
+import pprint
 import time
-from tqdm import tqdm
-import torch
-import math
-import numpy as np
 
-from torch.utils.data import DataLoader
-from torch.nn import DataParallel
-
-from attention_model.attention_model import set_decode_type
-from utils.log_utils import log_values
-from utils import move_to
-
-import csv
 import scipy.io as sio
+import torch
+import torch.optim as optim
+
+from attention_model.attention_model import AttentionModel
+from attention_model.pointer_network import PointerNetwork
+from attention_model.training_loop import (
+    clip_grad_norms,
+    get_inner_model,
+    jilu_val_cost,
+    rollout,
+    train_batch,
+    train_epoch,
+    validate,
+)
+from configurations import get_options
+from utils import load_problem, torch_load_cpu
+from utils.reinforce_baselines import (
+    ExponentialBaseline,
+    NoBaseline,
+    RolloutBaseline,
+    WarmupBaseline,
+)
+
+# Re-exported so legacy callers can keep importing from `train`.
+__all__ = [
+    "train_epoch",
+    "validate",
+    "rollout",
+    "train_batch",
+    "clip_grad_norms",
+    "get_inner_model",
+    "jilu_val_cost",
+]
 
 
-def jilu_val_cost(epoch, val_performance, t_cost, path):
-    # path = "1.csv"
-    with open(path, "a+") as f:
-        csv_write = csv.writer(f)
-        data_row = [epoch, val_performance, t_cost]
-        csv_write.writerow(data_row)
+def _build_model(opts, problem) -> torch.nn.Module:
+    cls = {"attention": AttentionModel, "pointer": PointerNetwork}.get(opts.model)
+    assert cls is not None, "Unknown model: {!r}".format(opts.model)
+    return cls(
+        opts.embedding_dim,
+        opts.hidden_dim,
+        problem,
+        n_encode_layers=opts.n_encode_layers,
+        mask_inner=True,
+        mask_logits=True,
+        normalization=opts.normalization,
+        tanh_clipping=opts.tanh_clipping,
+        checkpoint_encoder=opts.checkpoint_encoder,
+        shrink_size=opts.shrink_size,
+    ).to(opts.device)
 
 
-def get_inner_model(model):
-    return model.module if isinstance(model, DataParallel) else model
+def _build_baseline(opts, model, problem):
+    if opts.baseline == "rollout":
+        return RolloutBaseline(model, problem, opts)
+    if opts.baseline == "exponential":
+        return ExponentialBaseline(opts.exp_beta)
+    if opts.baseline in (None, "none"):
+        return NoBaseline()
+    raise ValueError("Unknown baseline: {!r}".format(opts.baseline))
 
 
-def validate(model, dataset, opts):
-    # Validate
-    print("Validating...")
-    t1 = time.time()
-    cost = rollout(model, dataset, opts)
-    t2 = time.time()
-    # print('val_cost',cost[0],dataset[0])
-    avg_cost = cost.mean()
-    print(
-        "Validation overall avg_cost: {} +- {}".format(
-            avg_cost, torch.std(cost) / math.sqrt(len(cost))
-        )
+def _save_checkpoint(model, opts, epoch: int) -> None:
+    ckpt_dir = "output/checkpoints"
+    os.makedirs(ckpt_dir, exist_ok=True)
+    torch.save(
+        {
+            "model_state_dict": get_inner_model(model).state_dict(),
+            "model_init_args": {
+                "embedding_dim": opts.embedding_dim,
+                "hidden_dim": opts.hidden_dim,
+                "n_heads": getattr(model, "n_heads", 8),
+                "n_encode_layers": opts.n_encode_layers,
+                "tanh_clipping": opts.tanh_clipping,
+                "mask_inner": True,
+                "mask_logits": True,
+                "normalization": opts.normalization,
+                "checkpoint_encoder": opts.checkpoint_encoder,
+                "shrink_size": opts.shrink_size,
+            },
+            "epoch": epoch,
+        },
+        "%s/variable_user_n%d_epoch%d.pth" % (ckpt_dir, opts.user_num, epoch),
     )
-    print("Validation time: {}".format(t2 - t1))
-    delay = t2 - t1
-    # top15_list = sio.loadmat("Top15/n%d_top15_tabu" % (opts.val_graph_size))['performance_list']
-    # Hit_top15 = 0
-    # Hit_top10 = 0
-    # Hit_top5 = 0
-    # Hit_top1 = 0
-    # for i in range(len(cost)):
-    #     # 降序排序
-    #     top15_list_i = np.sort(top15_list[i])
-    #     # print(i,'轮Top15:',-float(cost[i]),top15_list[i])
-    #     if -float(cost[i]) >= top15_list_i[0]:
-    #         Hit_top15 += 1
-    #     if -float(cost[i]) >= top15_list_i[4]:
-    #         Hit_top10 += 1
-    #     if -float(cost[i]) >= top15_list_i[9]:
-    #         Hit_top5 += 1
-    #     if -float(cost[i]) >= top15_list_i[14]:
-    #         Hit_top1 += 1
-    #
-    # Hit_top15_percent = Hit_top15 / len(cost)
-    # Hit_top10_percent = Hit_top10 / len(cost)
-    # Hit_top5_percent = Hit_top5 / len(cost)
-    # Hit_top1_percent = Hit_top1 / len(cost)
-    #
-    # print('Top15 target percent:', Hit_top15_percent)
-    # print('Top10 target percent:', Hit_top10_percent)
-    # print('Top5 target percent:', Hit_top5_percent)
-    # print('Top1 target percent:', Hit_top1_percent)
-    return avg_cost, cost
 
 
-def rollout(model, dataset, opts):
-    # print(dataset)
-    # Put in greedy evaluation mode!
-    set_decode_type(model, "greedy")
-    model.eval()
-    print("model.eval")
+def main(opts) -> None:
+    pprint.pprint(vars(opts))
+    torch.manual_seed(opts.seed)
+    opts.device = torch.device("cuda:0" if opts.use_cuda else "cpu")
 
-    def eval_model_bat(bat):
-        with torch.no_grad():
-            cost, order = model(move_to(bat, opts.device))
-        # print(cost)
-        return cost.data.cpu()
+    os.makedirs(opts.save_dir, exist_ok=True)
+    with open(os.path.join(opts.save_dir, "args.json"), "w") as f:
+        json.dump(vars(opts), f, indent=True, default=str)
 
-    # aaaa = tqdm(DataLoader(dataset, batch_size=opts.eval_batch_size), disable=opts.no_progress_bar)
-    ccc = [
-        eval_model_bat(bat)
-        for bat in tqdm(
-            DataLoader(dataset, batch_size=opts.eval_batch_size),
-            disable=opts.no_progress_bar,
-        )
-    ]
-    bbb = torch.cat(ccc, 0)
-    # print('ccc',ccc)
-    # print('bbb',bbb)
-    return bbb
-
-
-def clip_grad_norms(param_groups, max_norm=math.inf):
-    """
-    Clips the norms for all param groups to max_norm and returns gradient norms before clipping
-    :param optimizer:
-    :param max_norm:
-    :param gradient_norms_log:
-    :return: grad_norms, clipped_grad_norms: list with (clipped) gradient norms per group
-    """
-    grad_norms = [
-        torch.nn.utils.clip_grad_norm_(
-            group["params"],
-            (
-                max_norm if max_norm > 0 else math.inf
-            ),  # Inf so no clipping but still call to calc
-            norm_type=2,
-        )
-        for group in param_groups
-    ]
-    grad_norms_clipped = (
-        [min(g_norm, max_norm) for g_norm in grad_norms] if max_norm > 0 else grad_norms
-    )
-    return grad_norms, grad_norms_clipped
-
-
-def train_epoch(
-    model,
-    optimizer,
-    baseline,
-    lr_scheduler,
-    epoch,
-    val_dataset,
-    problem,
-    tb_logger,
-    opts,
-):
-    print(
-        "Start train epoch {}, lr={} for run {}".format(
-            epoch, optimizer.param_groups[0]["lr"], opts.run_name
-        )
-    )
-    # print(val_dataset.w)
-    step = epoch * (opts.epoch_size // opts.batch_size)
-    start_time = time.time()
-
+    tb_logger = None
     if not opts.no_tensorboard:
-        tb_logger.log_value("learnrate_pg0", optimizer.param_groups[0]["lr"], step)
+        from tensorboard_logger import Logger as TbLogger
+        tb_logger = TbLogger(
+            os.path.join(opts.log_dir, "{}_{}".format(opts.problem, opts.user_num), opts.run_name)
+        )
 
-    # Generate new training data for each epoch
-    # print('start**************')
-    # 在每个epoch中都重新生成新的数据集，且使用baseline网络来对数据进行预测来作为标签    # xxx每次生成新的数据集处  每次由class NOOPDataset(Dataset)产生，当时生成写错，导致一直没变
-    xxx = problem.make_allnum_dataset(
-        size=opts.graph_size,
-        num_samples=opts.epoch_size,
+    problem = load_problem(opts.problem)
+    model = _build_model(opts, problem)
+
+    # Optional checkpoint load.
+    load_path = opts.load_path or opts.resume
+    if load_path:
+        print("  [*] Loading data from {}".format(load_path))
+        load_data = torch_load_cpu(load_path)
+        get_inner_model(model).load_state_dict(
+            {**get_inner_model(model).state_dict(), **load_data.get("model_state_dict", load_data.get("model", {}))}
+        )
+
+    baseline = _build_baseline(opts, model, problem)
+
+    optimizer = optim.Adam(
+        [{"params": model.parameters(), "lr": opts.lr_model}]
+        + (
+            [{"params": baseline.get_learnable_parameters(), "lr": opts.lr_critic}]
+            if len(baseline.get_learnable_parameters()) > 0
+            else []
+        )
+    )
+    lr_scheduler = optim.lr_scheduler.LambdaLR(
+        optimizer, lambda epoch: opts.lr_decay**epoch
+    )
+
+    val_dataset = problem.load_val_dataset(
+        size=opts.val_graph_size,
+        num_samples=opts.val_size,
+        filename=opts.val_dataset,
         distribution=opts.data_distribution,
     )
 
-    # print('xxx_index',xxx[0],xxx[-1],xxx)
-    training_dataset = baseline.wrap_dataset(xxx)
-    # print('training_dataset',training_dataset[0],training_dataset[-1])
-    # print('xxx',xxx)
-    # print('middle*********')
-    training_dataloader = DataLoader(
-        training_dataset, batch_size=opts.batch_size, num_workers=1
-    )
-    # print('end**************')
-    # Put model in train mode!
-    model.train()
-    set_decode_type(model, "sampling")
-    # print("111!!!!")
+    if opts.eval_only:
+        opts.eval_batch_size = 1
+        t0 = time.time()
+        validate(model, val_dataset, opts)
+        print(f"ASOPA average validation time: {(time.time() - t0) / opts.val_size:.4f}s/sample")
+        return
 
-    for batch_id, batch in enumerate(
-        tqdm(training_dataloader, disable=opts.no_progress_bar)
-    ):
-        # print("22!!!!")
-
-        train_batch(
-            model, optimizer, baseline, epoch, batch_id, step, batch, tb_logger, opts
+    cost_history = []
+    best_reward = -float("inf")
+    for epoch in range(opts.epoch_start, opts.epoch_start + opts.n_epochs):
+        avg_reward, cost = train_epoch(
+            model, optimizer, baseline, lr_scheduler, epoch,
+            val_dataset, problem, tb_logger, opts,
         )
-        # print("!!!!!\n")
-        step += 1
+        if avg_reward > best_reward:
+            best_reward = avg_reward
+            print(f"New best model! Epoch {epoch}, Reward: {avg_reward:.4f}")
+            _save_checkpoint(model, opts, epoch)
+        cost_history.append(cost.tolist())
 
-    epoch_duration = time.time() - start_time
-    print(
-        "Finished epoch {}, took {} s".format(
-            epoch, time.strftime("%H:%M:%S", time.gmtime(epoch_duration))
-        )
+    out_dir = "input_data/output"
+    os.makedirs(out_dir, exist_ok=True)
+    sio.savemat(
+        "%s/n%d_performance_value_%d.mat" % (out_dir, opts.user_num, opts.val_size),
+        {"performance_percent": cost_history},
     )
 
-    # if (opts.checkpoint_epochs != 0 and epoch % opts.checkpoint_epochs == 0) or epoch == opts.n_epochs - 1:
-    #     print('Saving model and state...')
-    #     torch.save(
-    #         {
-    #             'model': get_inner_model(model).state_dict(),
-    #             'optimizer': optimizer.state_dict(),
-    #             'rng_state': torch.get_rng_state(),
-    #             'cuda_rng_state': torch.cuda.get_rng_state_all(),
-    #             'baseline': baseline.state_dict()
-    #         },
-    #         os.path.join(opts.save_dir, 'epoch-{}.pt'.format(epoch))
-    #     )
-    t1 = time.time()
-    avg_reward, cost = validate(model, val_dataset, opts)
-    t2 = time.time()
-    t_cost = t2 - t1
-    # print('Validation duration',t_cost)
-    jilu_val_cost(
-        epoch, -avg_reward.item(), t_cost, "%d_n_allnum.csv" % (opts.val_user_num)
-    )
 
-    # if not opts.no_tensorboard:
-    #     tb_logger.log_value('val_avg_reward', avg_reward, step)
-
-    baseline.epoch_callback(model, epoch)
-
-    # lr_scheduler should be called at end of epoch
-    lr_scheduler.step()
-    # return -avg_reward.item()
-    return -avg_reward.item(), cost
-
-
-def train_batch(
-    model, optimizer, baseline, epoch, batch_id, step, batch, tb_logger, opts
-):
-    training_start = time.time()
-
-    x, bl_val = baseline.unwrap_batch(batch)
-    # print('bl_val',bl_val)
-    # print('x',x)
-
-    x = move_to(x, opts.device)
-    bl_val = move_to(bl_val, opts.device) if bl_val is not None else None
-    # Evaluate model, get costs and log probabilities
-    cost, log_likelihood = model(x)
-    # print(cost,len(cost),log_likelihood)
-    # Evaluate baseline, get baseline loss if any (only for critic)
-
-    bl_val, bl_loss = baseline.eval(x, cost) if bl_val is None else (bl_val, 0)
-    # print('bl_val:',bl_val,'bl_loss:',bl_loss)
-    # print('bl_val:',type(bl_val),'bl_loss:',bl_loss)
-
-    # Calculate REINFORCE loss with advantage clipping
-    # advantage = cost - baseline, clipped to [-1, 1] for stability
-    # This prevents extreme gradients when cost deviates significantly from baseline
-    c_reward = 1
-    baseline_gap = cost - bl_val
-    baseline_gap = torch.clamp(baseline_gap, min=-c_reward, max=c_reward)
-    reinforce_loss = (baseline_gap * log_likelihood).mean()
-    # reinforce_loss = ((cost - bl_val) * log_likelihood).mean()
-    loss = reinforce_loss + bl_loss
-
-    # Perform backward pass and optimization step
-    optimizer.zero_grad()
-    loss.backward()
-    # Clip gradient norms and get (clipped) gradient norms for logging
-    grad_norms = clip_grad_norms(optimizer.param_groups, opts.max_grad_norm)
-    optimizer.step()
-    training_end = time.time()
-    training_cost = training_end - training_start
-
-    # print('training_cost',training_cost)
-    # path_ = "%d_n_training_cost.csv"%(opts.val_user_num)
-    # with open(path_, 'a+') as f:
-    #     csv_write = csv.writer(f)
-    #     data_row = [epoch, training_cost]
-    #     csv_write.writerow(data_row)
-    # Logging
-    if step % int(opts.log_step) == 0:
-        log_values(
-            cost,
-            grad_norms,
-            epoch,
-            batch_id,
-            step,
-            log_likelihood,
-            reinforce_loss,
-            bl_loss,
-            tb_logger,
-            opts,
-        )
+if __name__ == "__main__":
+    main(get_options())
