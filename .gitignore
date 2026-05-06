@@ -222,3 +222,14 @@ outputs/
 
 # Ignore swap files
 *.swp
+
+# ASOPA refactor — keep legacy full-pickle checkpoints local but never commit
+output/checkpoints/legacy/
+
+# Tensorboard run logs
+logs/
+runs/
+
+# Generated output of training runs
+performance_percent/
+input_data/output/

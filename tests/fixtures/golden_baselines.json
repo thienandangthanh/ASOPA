@@ -1,0 +1,25 @@
+{
+  "g_desc": {
+    "order_ids": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "utility": 42.549590209150594
+  },
+  "w_desc": {
+    "order_ids": [
+      1,
+      2,
+      3,
+      0,
+      4
+    ],
+    "utility": 42.47519411134802
+  },
+  "exhaustive": {
+    "error": "TypeError(\"'>=' not supported between instances of 'NoneType' and 'int'\")"
+  }
+}

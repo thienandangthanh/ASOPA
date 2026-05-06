@@ -29,16 +29,11 @@ ENV PATH="/home/nonroot/.local/bin:$PATH"
 # Set working directory
 WORKDIR /workspace/ASOPA
 
-# Copy project files
-COPY requirements.txt .
+# Copy lockfile + manifest first (better build-cache hit rate)
+COPY pyproject.toml uv.lock* ./
 
-# Create virtual environment with uv
-RUN uv venv .venv
-
-# Install Python dependencies with GPU support
-RUN . .venv/bin/activate && \
-    uv pip install -r requirements.txt \
-    --index https://download.pytorch.org/whl/cu121
+# Install Python dependencies with GPU support via uv sync (uses [tool.uv.sources] cu121 index)
+RUN uv sync --extra cu121 --frozen || uv sync --extra cu121
 
 # Set environment variables for GPU access
 ENV NVIDIA_VISIBLE_DEVICES=all
