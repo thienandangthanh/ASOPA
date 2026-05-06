@@ -219,3 +219,6 @@ outputs/
 
 # Ignore all PyTorch checkpoints
 *.pth
+
+# Ignore swap files
+*.swp
