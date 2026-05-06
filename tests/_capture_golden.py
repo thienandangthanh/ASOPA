@@ -191,7 +191,8 @@ def capture_baselines() -> dict:
     set_users_g(real, g_arr)
     set_users_w(real, w_arr)
     try:
-        decode_order, max_util = duibi_exhaustive_search(real)
+        # duibi_exhaustive_search returns 4-tuple: (best_order, best_util, top15, top15_orders).
+        decode_order, max_util, _, _ = duibi_exhaustive_search(real, alpha=1)
         out["exhaustive"] = {
             "decode_order": [int(x) for x in decode_order],
             "utility": float(max_util),
@@ -202,14 +203,15 @@ def capture_baselines() -> dict:
     return out
 
 
-def capture_validation_n8(checkpoint_path: Path) -> dict:
-    """Run the full ASOPA_validation flow on n=8 against epoch-480 checkpoint, CPU."""
+def capture_validation_n8(state_dict_path: Path) -> dict:
+    """Run the full ASOPA_validation flow on n=8 against epoch-480 state_dict checkpoint, CPU."""
+    from nets.attention_model import AttentionModel
     from options import get_options
     from train import validate
     from utils import load_problem
 
-    if not checkpoint_path.exists():
-        return {"skipped": True, "reason": f"checkpoint not found: {checkpoint_path}"}
+    if not state_dict_path.exists():
+        return {"skipped": True, "reason": f"checkpoint not found: {state_dict_path}"}
 
     opts = get_options(
         [
@@ -232,9 +234,22 @@ def capture_validation_n8(checkpoint_path: Path) -> dict:
 
     problem = load_problem(opts.problem)
 
-    # Full-pickle load of legacy checkpoint (works pre-refactor).
-    model = torch.load(str(checkpoint_path), weights_only=False, map_location="cpu")
-    model = model.to(opts.device)
+    payload = torch.load(str(state_dict_path), weights_only=False, map_location="cpu")
+    init_args = payload["model_init_args"]
+    model = AttentionModel(
+        init_args["embedding_dim"],
+        init_args["hidden_dim"],
+        problem,
+        n_encode_layers=init_args["n_encode_layers"],
+        mask_inner=init_args["mask_inner"],
+        mask_logits=init_args["mask_logits"],
+        normalization=init_args.get("normalization", "batch"),
+        tanh_clipping=init_args["tanh_clipping"],
+        checkpoint_encoder=init_args.get("checkpoint_encoder", False),
+        shrink_size=init_args.get("shrink_size", None),
+    ).to(opts.device)
+    model.load_state_dict(payload["model_state_dict"])
+    model.eval()
 
     val_dataset = problem.load_val_dataset(
         size=opts.val_graph_size,
@@ -252,7 +267,7 @@ def capture_validation_n8(checkpoint_path: Path) -> dict:
 
     cost_arr = cost.detach().cpu().numpy().astype(np.float64)
     return {
-        "checkpoint": str(checkpoint_path.name),
+        "checkpoint": str(state_dict_path.name),
         "val_size": int(opts.val_size),
         "val_graph_size": int(opts.val_graph_size),
         "avg_cost": float(avg_cost),
@@ -285,7 +300,7 @@ def main():
     (FIXTURES / "golden_baselines.json").write_text(json.dumps(fixtures["baselines"], indent=2))
 
     print("[5/5] capture n=8 validation (CPU)…", flush=True)
-    ckpt = PROJECT_ROOT / "Variable_user_n10_epoch480.pth"
+    ckpt = PROJECT_ROOT / "output" / "checkpoints" / "variable_user_n10_epoch480.pth"
     fixtures["validation_n8"] = capture_validation_n8(ckpt)
     (FIXTURES / "golden_n8_validation.json").write_text(json.dumps(fixtures["validation_n8"], indent=2))
 

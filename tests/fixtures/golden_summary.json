@@ -148,11 +148,18 @@
       "utility": 42.47519411134802
     },
     "exhaustive": {
-      "error": "TypeError(\"'>=' not supported between instances of 'NoneType' and 'int'\")"
+      "decode_order": [
+        1,
+        4,
+        2,
+        3,
+        0
+      ],
+      "utility": 55.24363762962737
     }
   },
   "validation_n8": {
-    "checkpoint": "Variable_user_n10_epoch480.pth",
+    "checkpoint": "variable_user_n10_epoch480.pth",
     "val_size": 100,
     "val_graph_size": 8,
     "avg_cost": -65.47529576270465,
@@ -172,6 +179,6 @@
     "cost_std": 17.424602450093044,
     "cost_min": -103.0264147826995,
     "cost_max": -32.043774638483605,
-    "wall_seconds": 1.5288498401641846
+    "wall_seconds": 1.4643783569335938
   }
 }

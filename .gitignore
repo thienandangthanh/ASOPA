@@ -233,3 +233,6 @@ runs/
 # Generated output of training runs
 performance_percent/
 input_data/output/
+
+# Per-validation-step CSV emitted by train.py
+*_n_allnum.csv

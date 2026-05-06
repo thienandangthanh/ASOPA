@@ -29,11 +29,11 @@ if str(PROJECT_ROOT) not in sys.path:
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")
 
 
-@pytest.fixture(autouse=True)
-def _isolated_argv(monkeypatch):
-    """Clear sys.argv so modules that call `parser.parse_args()` at import
-    time (e.g. legacy `conf.py`) don't see pytest's own argv."""
-    monkeypatch.setattr(sys, "argv", ["pytest"])
+# Clear sys.argv at module scope so modules that call `parser.parse_args()` at
+# import time (e.g. legacy `conf.py`) don't choke on pytest's own argv. This
+# fires before any fixture or test, including module-scope fixtures whose
+# imports happen during fixture setup.
+sys.argv = ["pytest"]
 
 
 @pytest.fixture
