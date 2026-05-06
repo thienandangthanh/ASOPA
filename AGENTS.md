@@ -69,45 +69,45 @@ ssh asopa.devpod 'source .venv/bin/activate && python -c "import torch; print(to
 
 ```
 ASOPA/
-├── nets/                          # Neural network implementations
+├── attention_model/               # Neural network implementations
 │   ├── attention_model.py         # Core attention model (MAIN MODEL)
 │   ├── graph_encoder.py           # Graph attention encoder
 │   ├── critic_network.py          # Baseline network
 │   └── pointer_network.py          # Alternative model
-├── problems/                      # Problem definitions
+├── sic_ordering/                  # NOOP problem class + datasets
 │   └── noop/                      # NOMA optimization problem
 │       ├── problem_noop.py        # Problem definition & cost calculation
 │       └── state_noop.py          # RL state management
-├── resource_allocation_optimization.py  # Power allocation optimization
+├── power_allocation/  # Power allocation optimization
 ├── run.py                         # Main training entry point
 ├── ASOPA_validation.py            # Model validation
 ├── train.py                       # Training loop implementation
-├── conf.py                        # Configuration parameters
-├── options.py                     # Training options
+├── configurations/                # Argparse: env/learning/runtime
+├── # (options.py and conf.py have been split into configurations/)
 └── docs/                          # Comprehensive documentation
 ```
 
 ## Key Files for AI Agents
 
 ### Critical Files (High Priority)
-1. **`nets/attention_model.py`** - Core neural network architecture
-2. **`resource_allocation_optimization.py`** - Power optimization solver
-3. **`problems/noop/problem_noop.py`** - Problem definition and cost calculation
+1. **`attention_model/attention_model.py`** - Core neural network architecture
+2. **`power_allocation/`** - Power optimization solver
+3. **`sic_ordering/problem_noop.py`** - Problem definition and cost calculation
 4. **`train.py`** - Training loop and policy gradient implementation
 5. **`run.py`** - Main orchestration script
 
 ### Important Files (Medium Priority)
-1. **`nets/graph_encoder.py`** - Graph attention mechanism
-2. **`problems/noop/state_noop.py`** - RL state management
-3. **`conf.py`** - Configuration parameters
-4. **`options.py`** - Training options
+1. **`attention_model/graph_encoder.py`** - Graph attention mechanism
+2. **`sic_ordering/state_noop.py`** - RL state management
+3. **`configurations/env_config.py`** - Configuration parameters
+4. **`configurations/learning_config.py` + `configurations/runtime_config.py`** - Training options
 5. **`ASOPA_validation.py`** - Validation and evaluation
 
 ### Supporting Files (Lower Priority)
 1. **`utils/`** - Utility functions
-2. **`nets/critic_network.py`** - Baseline network
-3. **`nets/pointer_network.py`** - Alternative model
-4. **`my_utils.py`** - Custom utilities
+2. **`attention_model/critic_network.py`** - Baseline network
+3. **`attention_model/pointer_network.py`** - Alternative model
+4. **`utils/seeding.py` and `power_allocation/topology.py`** - Custom utilities
 
 ## Architecture Context
 
@@ -129,7 +129,7 @@ Input Data → Attention Model → SIC Ordering → Power Allocation → Network
 ## Common Tasks for AI Agents
 
 ### 1. Adding New Attention Mechanisms
-**Location**: `nets/attention_model.py` or create new file in `nets/`
+**Location**: `attention_model/attention_model.py` or create new file in `attention_model/`
 **Pattern**:
 ```python
 class MyAttentionModel(nn.Module):
@@ -143,7 +143,7 @@ class MyAttentionModel(nn.Module):
 ```
 
 ### 2. Adding New Optimization Methods
-**Location**: `resource_allocation_optimization.py`
+**Location**: `power_allocation/`
 **Pattern**:
 ```python
 def my_power_optimization(users, alpha=1.0, noise=3.981e-15):
@@ -159,7 +159,7 @@ def get_optimal_p(users, alpha=1.0, noise=3.981e-15, solver='cvxopt'):
 ```
 
 ### 3. Adding New Baseline Methods
-**Location**: `resource_allocation_optimization.py`
+**Location**: `power_allocation/`
 **Pattern**:
 ```python
 def duibi_my_baseline(users, alpha=1.0, noise=3.981e-15):
@@ -179,7 +179,7 @@ def duibi_my_baseline(users, alpha=1.0, noise=3.981e-15):
 - `validate()`: Model validation
 
 ### 5. Adding New Problem Variants
-**Location**: `problems/my_problem/`
+**Location**: `sic_ordering/my_problem/`
 **Pattern**:
 ```python
 class MyProblem:
@@ -196,13 +196,13 @@ class MyProblem:
 
 ### Key Parameters
 ```python
-# conf.py - Problem parameters
+# configurations/env_config.py — NOMA problem params
 parser.add_argument('--user_num', default=10)           # Number of users
 parser.add_argument('--val_user_num', default=8)       # Validation users
 parser.add_argument('--alpha', default=1)             # Fairness parameter
 parser.add_argument('--noise', default=3.981e-15)     # Gaussian noise
 
-# options.py - Model parameters
+# configurations/learning_config.py — RL/NN hyperparams
 parser.add_argument('--embedding_dim', default=128)    # Embedding dimension
 parser.add_argument('--hidden_dim', default=128)       # Hidden layer size
 parser.add_argument('--n_heads', default=8)            # Attention heads
@@ -287,9 +287,9 @@ def monitor_gradients(model):
 5. **Real-time adaptation** for dynamic networks
 
 ### Implementation Areas
-- **Neural architectures** in `nets/`
-- **Optimization methods** in `resource_allocation_optimization.py`
-- **Problem variants** in `problems/`
+- **Neural architectures** in `attention_model/`
+- **Optimization methods** in `power_allocation/`
+- **Problem variants** in `sic_ordering/`
 - **Training strategies** in `train.py`
 - **Baseline methods** for comparison
 
@@ -326,14 +326,14 @@ ssh asopa.devpod 'source .venv/bin/activate && black --check .'
 ssh asopa.devpod 'source .venv/bin/activate && flake8 .'
 
 # Type checking
-ssh asopa.devpod 'source .venv/bin/activate && mypy nets/ problems/'
+ssh asopa.devpod 'source .venv/bin/activate && mypy attention_model/ sic_ordering/'
 ```
 
 ## File Dependencies
 
 ### Critical Dependencies
 - `attention_model.py` depends on `graph_encoder.py`
-- `problem_noop.py` depends on `resource_allocation_optimization.py`
+- `problem_noop.py` depends on `power_allocation/`
 - `train.py` depends on `attention_model.py` and `problem_noop.py`
 - `run.py` orchestrates all components
 
@@ -347,7 +347,7 @@ import numpy as np
 # Project imports
 from nets.attention_model import AttentionModel
 from problems.noop import NOOP
-from resource_allocation_optimization import get_optimal_p
+from power_allocation import get_optimal_p
 ```
 
 ## Error Patterns to Avoid
@@ -417,9 +417,9 @@ from resource_allocation_optimization import get_optimal_p
 - `duibi_*()`: Baseline comparison methods
 
 ### Key Files
-- `nets/attention_model.py`: Core model
-- `resource_allocation_optimization.py`: Optimization
-- `problems/noop/problem_noop.py`: Problem definition
+- `attention_model/attention_model.py`: Core model
+- `power_allocation/`: Optimization
+- `sic_ordering/problem_noop.py`: Problem definition
 - `train.py`: Training implementation
 
 ---

@@ -82,7 +82,7 @@ The container setup handles all the heavy lifting including Python, CUDA, and de
    - Python 3.10+ with uv package manager
    - PyTorch 2.3.1 (pinned version for compatibility)
    - CUDA 12.1+ support
-   - All project dependencies from requirements.txt
+   - All project dependencies from pyproject.toml (uv)
 
 #### Common Development Commands
 
@@ -162,13 +162,13 @@ ASOPA/
 │   ├── ARCHITECTURE.md
 │   ├── DEVELOPMENT_GUIDE.md
 │   └── TROUBLESHOOTING.md
-├── nets/                          # Neural network implementations
+├── attention_model/               # Neural network implementations
 │   ├── __init__.py
 │   ├── attention_model.py         # Core attention model
 │   ├── graph_encoder.py           # Graph attention encoder
 │   ├── critic_network.py          # Baseline network
 │   └── pointer_network.py         # Alternative model
-├── problems/                      # Problem definitions
+├── sic_ordering/                  # NOOP problem class + datasets
 │   ├── __init__.py
 │   └── noop/                      # NOMA optimization problem
 │       ├── __init__.py
@@ -194,9 +194,9 @@ ASOPA/
 │   ├── training.yaml              # Training configuration
 │   └── validation.yaml            # Validation configuration
 ├── run.py                         # Main entry point
-├── conf.py                        # Configuration parser
-├── options.py                     # Training options
-└── requirements.txt               # Dependencies
+├── configurations/                # Argparse: env/learning/runtime
+├── # (options.py and conf.py have been split into configurations/)
+└── pyproject.toml (uv)               # Dependencies
 ```
 
 ### Coding Standards
@@ -273,7 +273,7 @@ class AttentionModel(nn.Module):
 #### Step 1: Create Model Class
 
 ```python
-# nets/my_attention_model.py
+# attention_model/my_attention_model.py
 import torch
 import torch.nn as nn
 from typing import Tuple
@@ -306,7 +306,7 @@ class MyAttentionModel(nn.Module):
 #### Step 2: Register Model
 
 ```python
-# nets/__init__.py
+# attention_model/__init__.py
 from .attention_model import AttentionModel
 from .my_attention_model import MyAttentionModel
 
@@ -326,7 +326,7 @@ def get_model(model_name: str, **kwargs):
 #### Step 3: Add Configuration
 
 ```python
-# options.py
+# configurations/learning_config.py
 parser.add_argument('--model', default='attention', 
                    choices=['attention', 'my_attention', 'pointer'],
                    help="Model architecture to use")
@@ -359,7 +359,7 @@ def test_my_attention_model():
 #### Step 1: Implement Solver
 
 ```python
-# resource_allocation_optimization.py
+# power_allocation/
 
 def my_power_optimization(users: List[User], alpha: float = 1.0, 
                          noise: float = 3.981e-15) -> List[float]:
@@ -390,7 +390,7 @@ def my_power_optimization(users: List[User], alpha: float = 1.0,
 #### Step 2: Integrate with Framework
 
 ```python
-# resource_allocation_optimization.py
+# power_allocation/
 
 def get_optimal_p(users: List[User], alpha: float = 1.0, 
                  noise: float = 3.981e-15, solver: str = 'cvxopt') -> List[float]:
@@ -416,7 +416,7 @@ def get_optimal_p(users: List[User], alpha: float = 1.0,
 #### Step 3: Add Configuration
 
 ```python
-# conf.py
+# configurations/env_config.py
 parser.add_argument('--power_solver', default='cvxopt',
                    choices=['cvxopt', 'my_method', 'nlopt'],
                    help="Power allocation solver")
@@ -427,7 +427,7 @@ parser.add_argument('--power_solver', default='cvxopt',
 #### Step 1: Implement Baseline
 
 ```python
-# resource_allocation_optimization.py
+# power_allocation/
 
 def duibi_my_baseline(users: List[User], alpha: float = 1.0, 
                      noise: float = 3.981e-15) -> Tuple[List[int], float]:
@@ -492,7 +492,7 @@ def run_baseline_comparison(method_name: str, users: List[User]):
 #### Step 1: Create Problem Class
 
 ```python
-# problems/my_problem/problem_my.py
+# sic_ordering/my_problem/problem_my.py
 import torch
 from typing import NamedTuple, Tuple
 
@@ -533,7 +533,7 @@ class MyProblem:
 #### Step 2: Create State Class
 
 ```python
-# problems/my_problem/state_my.py
+# sic_ordering/my_problem/state_my.py
 import torch
 from typing import NamedTuple
 
@@ -656,7 +656,7 @@ class TestAttentionModel:
 # tests/test_optimization.py
 import pytest
 import numpy as np
-from resource_allocation_optimization import (
+from power_allocation import (
     User, get_optimal_p, get_max_sum_weighted_alpha_throughput
 )
 
@@ -735,7 +735,7 @@ class TestIntegration:
     def test_baseline_comparison(self):
         """Test baseline comparison."""
         # Test that all baseline methods work
-        from resource_allocation_optimization import (
+        from power_allocation import (
             duibi_exhaustive_search,
             duibi_heuristic_method_qian,
             duibi_tabu_search_gd

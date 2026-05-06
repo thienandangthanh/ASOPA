@@ -485,7 +485,7 @@ Set throughput weights for users.
 
 ## Configuration
 
-### Training Configuration (`conf.py`)
+### Training Configuration (`configurations/env_config.py`)
 
 ```python
 # Key training parameters
@@ -498,7 +498,7 @@ parser.add_argument('--noise', default=3.981e-15)        # Gaussian noise
 parser.add_argument('--seed', default=1234)              # Random seed
 ```
 
-### Model Configuration (`options.py`)
+### Model Configuration (`configurations/learning_config.py` + `configurations/runtime_config.py`)
 
 ```python
 # Model architecture parameters

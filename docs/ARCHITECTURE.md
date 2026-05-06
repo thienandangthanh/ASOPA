@@ -40,7 +40,7 @@ ASOPA implements a **two-stage optimization approach** for NOMA networks:
 
 ## Core Components
 
-### 1. Attention Model (`nets/attention_model.py`)
+### 1. Attention Model (`attention_model/attention_model.py`)
 
 The attention model is the core neural network responsible for determining optimal SIC ordering.
 
@@ -80,7 +80,7 @@ class AttentionModel(nn.Module):
         self.project_step_context = nn.Linear(embedding_dim, embedding_dim)
 ```
 
-### 2. Graph Attention Encoder (`nets/graph_encoder.py`)
+### 2. Graph Attention Encoder (`attention_model/graph_encoder.py`)
 
 Processes user features using multi-head attention mechanism.
 
@@ -105,7 +105,7 @@ def multi_head_attention(query, key, value, mask=None):
     return output
 ```
 
-### 3. Power Allocation Optimizer (`resource_allocation_optimization.py`)
+### 3. Power Allocation Optimizer (`power_allocation/`)
 
 Solves convex optimization for optimal power allocation given SIC ordering.
 
@@ -140,7 +140,7 @@ Where:
 3. **α > 1**:
    - Trivial solution (all power to one user)
 
-### 4. Problem Definition (`problems/noop/`)
+### 4. Problem Definition (`sic_ordering/`)
 
 Defines the NOMA optimization problem and provides cost calculation.
 
